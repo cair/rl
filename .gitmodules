@@ -1,0 +1,24 @@
+[submodule "cair_rl/xleet"]
+	path = cair_rl/envs/xleet
+	url = git@github.com:perara/X1337.git
+[submodule "cair_rl/deep_rts"]
+	path = cair_rl/envs/deep_rts
+	url = git@github.com:cair/deep-rts.git
+[submodule "cair_rl/envs/dlw_two"]
+	path = cair_rl/envs/dlw_two
+	url = https://github.com/cair/deep-line-wars-2.git
+[submodule "cair_rl/envs/dlw_one"]
+	path = cair_rl/envs/dlw_one
+	url = https://github.com/cair/deep-line-wars.git
+[submodule "cair_rl/envs/deep_maze"]
+	path = cair_rl/envs/deep_maze
+	url = https://github.com/cair/deep_maze.git
+[submodule "cair_rl/envs/hex_ai"]
+	path = cair_rl/envs/hex_ai
+	url = https://github.com/cair/hex-ai.git
+[submodule "cair_rl/envs/deep_warehouse"]
+	path = cair_rl/envs/deep_warehouse
+	url = https://github.com/cair/deep-warehouse.git
+[submodule "cair_rl/envs/flash_rl"]
+	path = cair_rl/envs/flash_rl
+	url = https://github.com/cair/FlashRL.git
