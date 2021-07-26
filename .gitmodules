@@ -22,3 +22,9 @@
 [submodule "cair_rl/envs/flash_rl"]
 	path = cair_rl/envs/flash_rl
 	url = https://github.com/cair/FlashRL.git
+[submodule "cair_rl/envs/classic_control/extern/random"]
+	path = cair_rl/envs/classic_control/extern/random
+	url = https://github.com/effolkronium/random.git
+[submodule "cair_rl/envs/classic_control/extern/spdlog"]
+	path = cair_rl/envs/classic_control/extern/spdlog
+	url = https://github.com/gabime/spdlog.git

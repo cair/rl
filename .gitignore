@@ -1,0 +1,9 @@
+
+*.iml
+.idea
+build
+cmake-build-*
+venv
+*.egg-info*
+*.eggg
+*.egg
