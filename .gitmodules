@@ -28,3 +28,15 @@
 [submodule "cair_rl/envs/classic_control/extern/spdlog"]
 	path = cair_rl/envs/classic_control/extern/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "cair_rl/envs/classic_control/extern/lightspark"]
+	path = cair_rl/envs/classic_control/extern/lightspark
+	url = https://github.com/lightspark/lightspark.git
+[submodule "cair_rl/envs/classic_control/extern/gnash"]
+	path = cair_rl/envs/classic_control/extern/gnash
+	url = https://github.com/strk/gnash.git
+[submodule "cpp/extern/flashrl-lightspark/lightspark"]
+	path = cpp/extern/flashrl-lightspark/lightspark
+	url = https://github.com/perara-libs/lightspark.git
+[submodule "cpp/extern/carma"]
+	path = cpp/extern/carma
+	url = https://github.com/RUrlus/carma.git

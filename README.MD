@@ -2,12 +2,42 @@
 ![CAIRL](./docs/CAIRL_LOGO.svg)
 CaiRL is a fast and efficient environment test-bench for reinforcement learning (RL) research.
 
+CaiRL focus on being fully compatible with [OpenAI Gym](https://github.com/openai/gym) but with magnitude faster execution times.
+```python
+ # Running OpenAI Gym
+import gym
+env = gym.make("CartPole-v0")
+for episode in range(10):
+    env.reset()
+    terminal = False
+    while not terminal:
+        state, reward, terminal, info = env.step(env.action_space.sample())
+        # Do Reinforcement Learning Stuff here ...    
+    
+# Running CaiRL Environment Suite
+import cairl.gym
+env = cairl.gym.make("CartPole-v0")
+for episode in range(10):
+    env.reset()
+    terminal = False
+    while not terminal:
+        state, reward, terminal, info = env.step(env.action_space.sample())
+        # Do Reinforcement Learning Stuff here ...
+ ```
+Okay so you have made a copy of OpenAI Gym, so what?
+![Results for CartPole](./docs/demo_0.png)
 
+Do I need to say more?
+
+
+<html>
+<!--
 ## Cite
 If you use CaiRL in your work, please cite the following paper:
 ```
 TODO
-```
+```-->
+</html>
 
 
 # Requirements
@@ -16,19 +46,22 @@ TODO
 # Installing
 `pip install https://github.com/cair/rl`
 
+
 # Environments
 The following environments are included as of this commit:
+1. Deep Maze (Python)
+2. Deep RTS (C++)
+3. Deep Warehouse (Python)
+4. Deep Line Wars 1 (Python)
+5. Deep Line Wars 2 (C++)
+6. Flash RL (C++)
+7. Hex AI (C/C++)
+8. X1337 Space Shooter (C++)
+9. Classic Control (C++)
 
-1. Deep Maze
-2. Deep RTS
-3. Deep Warehouse
-4. Deep Line Wars 1
-5. Deep Line Wars 2
-6. Flash RL
-7. Hex AI
-8. X1337 Space Shooter
+Note that not all environments are implemented in full CaiRL Gym style, but this is eventually the goal, including adding new games/problems/environments in the future!
 
-
+Feel free to put up a issue on the tracker if you find any bugs.
 
 # Licence
 Copyright 2021 Per-Arne Andersen
