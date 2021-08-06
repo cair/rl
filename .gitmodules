@@ -4,3 +4,5 @@
 [submodule "cpp/extern/flashrl-gnash"]
 	url = https://github.com/perara-libs/flashrl-gnash.git
 	branch = main
+[submodule "cpp/extern/flashrl-lightspark"]
+	branch = main
