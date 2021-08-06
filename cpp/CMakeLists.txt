@@ -12,6 +12,7 @@ file(LOCK ${CMAKE_SOURCE_DIR} DIRECTORY GUARD FILE)
 ##### CMAKE Includes
 #####
 #############################################################################################
+include(cmake/GitUpdate.cmake)
 include(cmake/pmm.cmake)
 include(cmake/CPM.cmake)
 include(cmake/AddSubdirectoryOptions.cmake)
