@@ -7,3 +7,7 @@ venv
 *.egg-info*
 *.eggg
 *.egg
+
+cairl/__pycache__/__init__.cpython-38.pyc
+
+cairl/__pycache__/gym.cpython-38.pyc
