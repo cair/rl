@@ -4,3 +4,6 @@
 [submodule "cpp/extern/carma"]
 	path = cpp/extern/carma
 	url = https://github.com/RUrlus/carma.git
+[submodule "cpp/extern/flashrl-gnash"]
+	url = https://github.com/perara-libs/flashrl-gnash.git
+	branch = main
