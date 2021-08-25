@@ -209,7 +209,13 @@ public:
 
     void generate_board(const std::string& prefix){
         auto board = get_board();
-        board = "puzzles 1\nsize: " + std::to_string(params->w) + "x" + std::to_string(params->h) + "\n" + board;
+        board = "%puzzles 1\n"
+                "%size " + std::to_string(params->w) + "x" + std::to_string(params->h) + "\n"
+                "%id " + get_id() + "\n" +
+                "%difficulty " + std::to_string(difficulty) + "\n" +
+                "%symmetry " + std::to_string(symmetry) + "\n" +
+                "%black_percent " + std::to_string(black_piece_age) + "\n"
+                + board;
         auto board_file_name = generate_generic_file_name(prefix, state->completed) + ".txt";
 
 
