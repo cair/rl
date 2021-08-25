@@ -7,6 +7,7 @@
 #include <limits>
 #include "cairl/spaces/Space.h"
 #include "cairl/defs.h"
+#include "cairl/utils/xtensor_cv_convertions.h"
 using cairl::spaces::Space;
 
 namespace cairl::envs{
@@ -57,15 +58,6 @@ namespace cairl::envs{
                 : action_space(std::move(action_space_))
                 , observation_space(std::move(observation_space_)){
             seed(time(NULL));
-
-            if constexpr(std::is_same_v<StateType, arma::Cube<StateScalar>>){
-                state = StateType(StateCols, StateRows, StateDims);
-            }else if constexpr(std::is_same_v<StateType, arma::Mat<StateScalar>>){
-                state = StateType(StateCols, StateRows);
-            }else if constexpr(std::is_same_v<StateType, cairl::utils::VectorWrapper<StateScalar>>){
-                state = StateType(StateCols);
-            }
-
         }
 
         void seed(const int seed_){

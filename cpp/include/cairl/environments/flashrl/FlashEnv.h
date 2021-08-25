@@ -24,8 +24,7 @@ namespace cairl::envs::flashrl{
         LightsparkRunner runner;
 
 
-
-        FlashEnv(const std::string& url)
+        explicit FlashEnv(const std::string& url)
         : Env({20}, {0, 255})
         , runner(url, 1000)
         {}
@@ -46,7 +45,7 @@ namespace cairl::envs::flashrl{
                 cv::resize(runner.ed->frame, output, cv::Size(150, 150), cv::INTER_LINEAR);
             }
 
-            state = to_arma<uchar, 3>(output);
+            state = mat_to_xarray(output); //to_arma<uchar, 3>(output);
             terminal = false;
             reward = 0.0;
 

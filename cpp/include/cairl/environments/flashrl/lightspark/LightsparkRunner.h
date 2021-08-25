@@ -1,14 +1,17 @@
 #pragma  once
 
-#include <lightspark/src/backends/security.h>
-#include <lightspark/src/swf.h>
-#include <lightspark/src/logger.h>
-#include <lightspark/src/platforms/engineutils.h>
-#include <lightspark/src/compat.h>
-#include <lightspark/src/parsing/streams.h>
-#include <lightspark/src/backends/config.h>
-#include <lightspark/src/backends/rendering.h>
-#include <lightspark/src/scripting/abc.h>
+/// Lightspark
+#include <backends/security.h>
+#include <swf.h>
+#include <logger.h>
+#include <platforms/engineutils.h>
+#include <compat.h>
+#include <parsing/streams.h>
+#include <backends/config.h>
+#include <backends/rendering.h>
+
+
+#include <scripting/abc.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>
 #include <filesystem>

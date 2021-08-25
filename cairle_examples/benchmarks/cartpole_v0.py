@@ -96,6 +96,10 @@ if __name__ == "__main__":
         f"Graphical ({runs_gui}) runs"
     ]
 
+    print(x)
+    print(y)
+    print(z)
+
     data = pd.DataFrame({
         "Environment": x,
         "Execution Time (msec)": y,

@@ -90,6 +90,7 @@ set(CAIRL_GYM_DEPENDENCIES
         #opencv
         python3
         sdl2-videodriver[offscreen]
+        xtensor[xsimd]
 )
 
 
@@ -103,6 +104,9 @@ set(CAIRL_GYM_LINK_TARGETS
         lighspark_lib  # extern/flashrl-lightspark
         carma
         armadillo
+        #xtensor xtensor::use_TBB
+        xtensor::optimize
+        xtensor::use_xsimd
 )
 
 
@@ -128,11 +132,15 @@ pmm(
 #find_package(sdl2-videodriver CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED )
 find_package(spdlog CONFIG REQUIRED)
+find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 
-find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)
+
 find_package(effolkronium_random CONFIG REQUIRED)
 find_package(Armadillo REQUIRED)
+find_package(xtensor CONFIG REQUIRED)
+
+
 
 
 find_package(OpenMP)
@@ -167,6 +175,9 @@ set(CAIRL_GYM_SOURCE_FILES
         # Renderer
         include/cairl/rendering/renderer.h
 
+        # Wrappers
+        include/cairl/wrappers/TimeLimit.h
+
         # Env
         include/cairl/environments/Env.h
         include/cairl/environments/flashrl/FlashEnv.h
@@ -182,7 +193,10 @@ set(CAIRL_GYM_SOURCE_FILES
 
         include/cairl/environments/flashrl/games/Multitask.h
         include/cairl/envs.h
-        include/cairl/utils/VectorWrapper.h)
+        include/cairl/utils/VectorWrapper.h
+        include/cairl/utils/xtensor_cv_convertions.h
+        include/cairl/wrappers/Flatten.h
+   )
 
 
 #############################################################################################

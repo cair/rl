@@ -3,18 +3,3 @@
 	url = https://github.com/RUrlus/carma.git
 [submodule "cpp/extern/flashrl-lightspark"]
 	branch = main
-[submodule "cpp/extern/envs/x1337/x1337"]
-	path = cpp/extern/envs/x1337/x1337
-	url = https://github.com/perara/X1337.git
-[submodule "cpp/extern/envs/deep-rts/deep-rts"]
-	path = cpp/extern/envs/deep-rts/deep-rts
-	url = https://github.com/cair/deep-rts.git
-[submodule "cpp/extern/envs/hex/hex-ai"]
-	path = cpp/extern/envs/hex/hex-ai
-	url = https://github.com/cair/hex-ai.git
-[submodule "cpp/extern/envs/deep-line-wars-cpp/deep-line-wars"]
-	path = cpp/extern/envs/deep-line-wars-cpp/deep-line-wars
-	url = https://github.com/cair/deep-line-wars-2.git
-[submodule "cpp/extern/envs/deep-line-wars-py/deep-line-wars"]
-	path = cpp/extern/envs/deep-line-wars-py/deep-line-wars
-	url = https://github.com/cair/deep-line-wars.git

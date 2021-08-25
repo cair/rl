@@ -17,6 +17,7 @@ endfunction()
 
 function(add_subdirectory_options)
     set(oneValueArgs PATH)
+    set(oneValueArgstwo PATH_BINARY)
     set(multiValueArgs OPTIONS)
     cmake_parse_arguments(SUBBY_ARGS "" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
 
@@ -29,7 +30,22 @@ function(add_subdirectory_options)
     endforeach()
 
     # Adds the subdirectory
-    add_subdirectory(${SUBBY_ARGS_PATH})
+    if (DOWNLOAD)
+
+        include(FetchContent)
+        FetchContent_Declare(
+                lightspark_dl
+                URL https://github.com/perara-libs/lightspark/archive/refs/heads/master.zip
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+                TEST_COMMAND ""
+        )
+        FetchContent_MakeAvailable(lightspark_dl)
+
+    else()
+        add_subdirectory(${SUBBY_ARGS_PATH} ${oneValueArgstwo})
+    endif()
 
     # Revert
     foreach(OPTION ${SUBBY_ARGS_OPTIONS})

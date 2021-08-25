@@ -14,7 +14,12 @@
 #include <mutex>
 #include <filesystem>
 #include <fstream>
+#include <thread>
+#include <functional>
+#include <condition_variable>
+#include <future>
 #include "StringUtils.h"
+#include <chrono>
 
 extern "C"{
     #include <custom_impl.c>
@@ -63,7 +68,8 @@ public:
     static const int DEFAULT_BLACK_PIECE_AGE = 20;
 
     explicit LightUp(
-            int size,
+            int width,
+            int height,
             Difficulty difficulty,
             Symmetry symmetry = SYMMETRY_NONE,
             int black_piece_age = DEFAULT_BLACK_PIECE_AGE
@@ -78,8 +84,8 @@ public:
     , seed(std::to_string(uniform_dist(e1)))
     , params(default_params()){
         /// Set parameters
-        params->w = size;
-        params->h = size;
+        params->w = width;
+        params->h = height;
         params->difficulty = difficulty;
         params->blackpc = black_piece_age;  // Age of black pieces
         params->symm = symmetry;
@@ -133,12 +139,12 @@ public:
     }
 
 
-    void generate_solution_action_set(){
-        if(!std::filesystem::exists("output")){
-            std::filesystem::create_directory("output");
+    void generate_solution_action_set(const std::string& prefix){
+        if(!std::filesystem::exists("output/" + prefix)){
+            std::filesystem::create_directory("output/" + prefix);
         }
         auto solution = get_solve_action_set();
-        auto file_name = generate_generic_file_name(true) + "_solution.txt";
+        auto file_name = generate_generic_file_name(prefix, true) + "_solution.txt";
 
         /// Write to file
         std::ofstream file(file_name);
@@ -148,9 +154,9 @@ public:
 
     }
 
-    void generate_screenshot(bool solve = false){
-        if(!std::filesystem::exists("output")){
-            std::filesystem::create_directory("output");
+    void generate_screenshot(const std::string& prefix, bool solve = false){
+        if(!std::filesystem::exists("output/" + prefix)){
+            std::filesystem::create_directory("output/" + prefix);
         }
 
         int argc = 0;
@@ -158,7 +164,7 @@ public:
         std::string arg_cpp = get_id();
 
 
-        auto screenshot_file = generate_generic_file_name(solve) + ".png";
+        auto screenshot_file = generate_generic_file_name(prefix, solve) + ".png";
 
         bool headless = TRUE;
         int argtype = ARG_ID;
@@ -190,9 +196,9 @@ public:
         delete fe;
     }
 
-    std::string generate_generic_file_name(bool solved){
+    std::string generate_generic_file_name(const std::string& prefix, bool solved){
         return string_format(
-                "output/%s_%s_%s---%s_%s",
+                "output/" + prefix + "/%s_%s_%s---%s_%s",
                 std::to_string(difficulty).c_str(),
                 std::to_string(symmetry).c_str(),
                 std::to_string(black_piece_age).c_str(),
@@ -201,10 +207,10 @@ public:
         );
     }
 
-    void generate_board(){
+    void generate_board(const std::string& prefix){
         auto board = get_board();
-
-        auto board_file_name = generate_generic_file_name(state->completed) + ".txt";
+        board = "puzzles 1\nsize: " + std::to_string(params->w) + "x" + std::to_string(params->h) + "\n" + board;
+        auto board_file_name = generate_generic_file_name(prefix, state->completed) + ".txt";
 
 
 
@@ -214,16 +220,57 @@ public:
         file.close();
     }
 
+    template <typename TF, typename TDuration, class... TArgs>
+            static std::result_of_t<TF&&(TArgs&&...)> run_with_timeout(TF&& f, TDuration timeout, TArgs&&... args)
+            {
+        using R = std::result_of_t<TF&&(TArgs&&...)>;
+        std::packaged_task<R(TArgs...)> task(f);
+        auto future = task.get_future();
+        std::thread thr(std::move(task), std::forward<TArgs>(args)...);
+        if (future.wait_for(timeout) != std::future_status::timeout)
+        {
+            thr.join();
+            return future.get(); // this will propagate exception from f() if any
+        }
+        else
+        {
+            thr.detach(); // we leave the thread still running
+            throw std::runtime_error("Timeout");
+        }
+    }
+
+    static void threaded_timeout_task(const std::function<void()>& fn){
+
+        std::mutex m;
+        std::condition_variable cv;
+
+
+        std::thread t([&cv, &fn]()
+        {
+            fn();
+            cv.notify_one();
+        });
+
+        t.detach();
+
+        {
+            std::unique_lock<std::mutex> l(m);
+            if(cv.wait_for(l, std::chrono::seconds(1)) == std::cv_status::timeout)
+                throw std::runtime_error("Timeout");
+        }
+
+    }
 
     static std::vector<std::string> generate_dataset(
+            const std::string& prefix,
             std::pair<int, int> min_max,
             const std::vector<int>& black_percentages,
             const std::vector<Difficulty>& difficulties,
             const std::vector<Symmetry>& symmetries,
             bool screenshot
     ){
-        if(!std::filesystem::exists("output")){
-            std::filesystem::create_directory("output");
+        if(!std::filesystem::exists("output/" + prefix)){
+            std::filesystem::create_directories("output/" + prefix);
         }
 
         if(min_max.first <= 0){
@@ -234,40 +281,45 @@ public:
         std::mutex g_lock;
         std::vector<std::string> results;
 
-        #pragma omp parallel  for
-        for(int x = min_max.first; x < min_max.second; x++){
-            for(auto difficulty : difficulties){
-                for(auto symmetry : symmetries){
+
+        for(auto difficulty : difficulties){
+            for(auto symmetry : symmetries){
+                #pragma omp parallel  for
+                for(int x = min_max.first; x < min_max.second; x++){
+                    for(int y = min_max.first; y < min_max.second; y++){
+                        if(x == y ||  x != y && symmetry != Symmetry::SYMMETRY_NONE){
+                            continue;
+                        }
+
                     for(auto b: black_percentages){
-                        auto instance = LightUp(x, difficulty, static_cast<Symmetry>(symmetry), b);
+                        auto instance = LightUp(x, y, difficulty, static_cast<Symmetry>(symmetry), b);
 
                         {
+
                             std::lock_guard stahp(g_lock);
 
 
+                            std::cout << "Generating... | Size: " << x << "," << y << " | Difficulty: " << int(difficulty) << " | Symmetry: " << int(symmetry)  << std::endl;
+
+
                             /// Generate solution string
-                            instance.generate_solution_action_set();
+                            instance.generate_solution_action_set(prefix);
 
                             /// Generate unsolved version
                             if(screenshot){
-                                instance.generate_screenshot();
+                                instance.generate_screenshot(prefix);
                             }
-                            instance.generate_board();
+                            instance.generate_board(prefix);
 
                             instance.solve();
 
                             /// Generate solved version
                             if(screenshot){
-                                instance.generate_screenshot(true);
+                                instance.generate_screenshot(prefix, true);
                             }
-                            instance.generate_board();
-
-
-
-
-                            std::cout << results.size() << "(" << x << ", " << x << ")" << std::endl;
+                            instance.generate_board(prefix);
                         }
-
+                    }
                     }
                 }
             }
@@ -282,17 +334,18 @@ public:
         std::string map;
         for (int y = 0; y < state->h; y++) {
             for (int x = 0; x < state->w; x++) {
-                c = '.';
+                c = '_';
                 if (GRID(state, flags, x, y) & F_BLACK) {
                     if (GRID(state, flags, x, y) & F_NUMBERED)
                         c = GRID(state, lights, x, y) + '0';
                     else
-                        c = '#';
+                        c = 'X';
                 } else {
                     if (GRID(state, flags, x, y) & F_LIGHT)
-                        c = 'O';
+                        c = '*';
                     else if (GRID(state, flags, x, y) & F_IMPOSSIBLE)
-                        c = 'X';
+                        c = '_'; // In case you want to draw impossible, change with X //c = 'X';
+
                 }
                 map += c;
             }

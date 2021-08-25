@@ -5,7 +5,7 @@
 
 int main(){
 
-    auto instance = LightUp(7, LightUp::HARD, LightUp::SYMMETRY_ROT2, 20);
+    auto instance = LightUp(7, 7, LightUp::HARD, LightUp::SYMMETRY_ROT2, 20);
 //    instance.generate_solution_action_set();
 //    instance.generate_screenshot();
 //    instance.generate_screenshot(true);
@@ -14,23 +14,45 @@ int main(){
 //    instance.generate_board();
 //
 //    exit(1);
+//
+//    LightUp::generate_dataset(
+//            "easy",
+//            {4, 21},
+//            {20, 40, 60},
+//            {
+//                LightUp::Difficulty::EASY,
+//            },
+//            {
+//                LightUp::Symmetry::SYMMETRY_NONE,
+//            },
+//            true
+//    );
 
-    auto datasets = LightUp::generate_dataset(
-            {2, 22},
-            {20, 30, 40, 50, 60, 70, 80},
+
+    LightUp::generate_dataset(
+            "tricky",
+            {4, 21},
+            {20, 40, 60},
             {
-                LightUp::Difficulty::EASY,
-                LightUp::Difficulty::HARD,
-                LightUp::Difficulty::TRICKY
-            },
-            {
+                LightUp::Difficulty::TRICKY,
+                },
+                {
                 LightUp::Symmetry::SYMMETRY_NONE,
-                LightUp::Symmetry::SYMMETRY_REF2,
-                LightUp::Symmetry::SYMMETRY_REF4,
-                LightUp::Symmetry::SYMMETRY_ROT2,
-                LightUp::Symmetry::SYMMETRY_ROT4
-            },
-            true
-    );
+                },
+                true
+                );
+//
+//    LightUp::generate_dataset(
+//            "hard",
+//            {4, 21},
+//            {20, 40, 60},
+//            {
+//                LightUp::Difficulty::HARD,
+//                },
+//                {
+//                LightUp::Symmetry::SYMMETRY_NONE,
+//                },
+//                true
+//                );
 
 }

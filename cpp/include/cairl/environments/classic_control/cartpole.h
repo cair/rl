@@ -13,6 +13,9 @@
 
 #include "cairl/rendering/renderer.h"
 #include "cairl/environments/Env.h"
+
+
+
 /*"""
 Classic cart-pole system implemented by Rich Sutton et al.
 Copied from http://incompleteideas.net/sutton/book/code/pole.c
@@ -37,12 +40,10 @@ permalink: https://perma.cc/C9ZM-652R
 """
 */
 // REFER TO https://github.com/openai/gym/blob/master/gym/envs/classic_control/cartpole.py
+    using cairl::spaces::Space;
 
-    using ActionSpace = Discrete;
-    class CartPoleEnv: public Env<
-            ActionSpace,
-            Box,
-            double, 4, 1, 1>
+
+    class CartPoleEnv: public Env<Discrete, Box, double, 4, 1, 1>
     {
         //    Description:
         //        A pole is attached by an un-actuated joint to a cart, which moves along
@@ -222,7 +223,7 @@ permalink: https://perma.cc/C9ZM-652R
 
 
 
-        StepReturnType step(ActionSpace as) override {
+        StepReturnType step(Discrete as) override {
             auto action = as.n;
 
             if(as.contains(action)){
