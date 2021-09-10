@@ -8,7 +8,6 @@
 #include "cairl/spaces/Box.h"
 #include "cairl/spaces/Discrete.h"
 #include "cairl/environments/flashrl/lightspark/LightsparkRunner.h"
-#include "cairl/utils/arma_cv_convertions.h"
 
 
 using cairl::spaces::Space;
@@ -35,7 +34,7 @@ namespace cairl::envs::flashrl{
         }
 
 
-        StepReturnType step(ActionSpace a) override{
+        StepReturnType step(ActionType a) override{
             // n = action value
 
             runner.ed->cond.wait(runner.ed->lk);

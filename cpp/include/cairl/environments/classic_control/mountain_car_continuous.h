@@ -1,82 +1,154 @@
 //
-// Created by per on 7/28/21.
+// Created by per on 9/10/21.
 //
 
-#ifndef CLASSIC_CONTROL_MOUNTAIN_CAR_CONTINUOUS_H
-#define CLASSIC_CONTROL_MOUNTAIN_CAR_CONTINUOUS_H
-#include "cairl/environments/Env.h"
+#ifndef CLASSIC_CONTROL_MOUNTAINCAR_CONTINUOUS_H
+#define CLASSIC_CONTROL_MOUNTAINCAR_CONTINUOUS_H
+#include "cairl/defs.h"
 #include "cairl/spaces/Discrete.h"
-
-
-using ActionSpace = cairl::spaces::Discrete;
+#include "cairl/spaces/Box.h"
+#include <cmath>
+#include "cairl/environments/Env.h"
+#include <xtensor/xio.hpp>
+using Random = effolkronium::random_static;
+using cairl::spaces::Discrete;
+using cairl::spaces::Box;
+using cairl::envs::Env;
 
 namespace cairl::envs{
 
 
+// REFER TO https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py
+    using cairl::spaces::Space;
 
 
-    class ContinuousMountainCarEnv: public Env<
-            ActionSpace,
-            Box,
-            double, 4, 1, 1>{
-        // """
-        //@author: Olivier Sigaud
-        //A merge between two sources:
-        //* Adaptation of the MountainCar Environment from the "FAReinforcement" library
-        //of Jose Antonio Martin H. (version 1.0), adapted by  'Tom Schaul, tom@idsia.ch'
-        //and then modified by Arnaud de Broissia
-        //* the OpenAI/gym MountainCar environment
-        //itself from
-        //http://incompleteideas.net/sutton/MountainCar/MountainCar1.cp
-        //permalink: https://perma.cc/6Z2N-PFWC
-        //"""
 
-        // Mountain Car Global variables:
-        float mcar_position, mcar_velocity;
+//    Description:
+//    The agent (a car) is started at the bottom of a valley. For any given
+//            state the agent may choose to accelerate to the left, right or cease
+//            any acceleration.
+//    Observation:
+//    Type: Box(2)
+//    Num    Observation               Min            Max
+//    0      Car Position              -1.2           0.6
+//    1      Car Velocity              -0.07          0.07
+//    Actions:
+//    Type: Box(1)
+//    Num    Action                    Min            Max
+//    0      the power coef            -1.0           1.0
+//    Note: actual driving force is calculated by multipling the power coef by power (0.0015)
+//    Reward:
+//    Reward of 100 is awarded if the agent reached the flag (position = 0.45) on top of the mountain.
+//    Reward is decrease based on amount of energy consumed each step.
+//    Starting State:
+//    The position of the car is assigned a uniform random value in
+//    [-0.6 , -0.4].
+//    The starting velocity of the car is always assigned to 0.
+//    Episode Termination:
+//    The car position is more than 0.45
+//    Episode length is greater than 200
+    class MountainCarContinuousEnv: public Env<Box<double, 1, 1, 1>, Box, double, 2, 1, 1>
+    {
 
-        /*constexpr double mcar_min_position -1.2;
-        constexpr double mcar_max_position 0.6;
-        constexpr double mcar_max_velocity 0.07;            // the negative of this is also the minimum velocity
-        constexpr double mcar_goal_position 0.5;
-        constexpr double POS_WIDTH = (1.7 / 8);               // the tile width for position
-        constexpr double VEL_WIDTH = (0.14 / 8);              // the tile width for velocity*/
+        static constexpr double MIN_ACTION = -1.0;
+        static constexpr double MAX_ACTION = 1.0;
 
+        static constexpr double MIN_POSITION = -1.2;
+        static constexpr double MAX_POSITION = 0.6;
+        static constexpr double MAX_SPEED = 0.07;
+        static constexpr double GOAL_POSITION = 0.45; // # was 0.5 in gym, 0.45 in Arnaud de Broissia's version
+        static constexpr double GOAL_VELOCITY = 0.0; // todo - input argument? https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py#L57
+        static constexpr double POWER = 0.0015;
+        static constexpr double GRAVITY = 0.0025;
 
-        /*
-         *
-        void load_F()
-        // Compute feature sets for current car state
-           {float state_vars[2];
-            state_vars[0] = mcar_position / POS_WIDTH;
-            state_vars[1] = mcar_velocity / VEL_WIDTH;
-            for (int a=0; a<M; a++)
-                GetTiles(&F[a][0],NUM_TILINGS,state_vars,2,N,a);}
-
-        void mcar_init()
-        // Initialize state of Car
-           {mcar_position = -0.5;
-            mcar_velocity = 0.0;}
-
-        void mcar_step(int a)
-        // Take action a, update state of car
-           {mcar_velocity += (a-1)*0.001 + cos(3*mcar_position)*(-0.0025);
-            if (mcar_velocity > mcar_max_velocity) mcar_velocity = mcar_max_velocity;
-            if (mcar_velocity < -mcar_max_velocity) mcar_velocity = -mcar_max_velocity;
-            mcar_position += mcar_velocity;
-            if (mcar_position > mcar_max_position) mcar_position = mcar_max_position;
-            if (mcar_position < mcar_min_position) mcar_position = mcar_min_position;
-            if (mcar_position==mcar_min_position && mcar_velocity<0) mcar_velocity = 0;}
-
-        bool mcar_goal_p ()
-        // Is Car within goal region?
-           {return mcar_position >= mcar_goal_position;}
+    public:
 
 
-         */
+        MountainCarContinuousEnv()
+                : Env({},{
+                {-1.2, 0.6},
+                {-0.07, 0.07},
+        })
+        {
+            reset();
+        }
+
+        const cv::Mat& render(const char* = "human"/*mode*/) override{
+            // todo - https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py#L108
+            return cv::Mat();
+        }
+
+
+
+        static double clip(double value, double min, double max){
+            return std::max(std::min(value, max), min);
+        }
+
+        StepReturnType step(ActionType as) override {
+            auto action = as[0];
+
+            if(action < MIN_ACTION || action > MAX_ACTION){
+                throw std::runtime_error(fmt::format("{} ({}) invalid", action, "double"));
+            }
+
+            auto position = state[0];
+            auto velocity = state[1];
+            const auto force = action;
+            velocity += force * POWER - GRAVITY * std::cos(3 * position);
+            if(velocity > MAX_SPEED){
+                velocity = MAX_SPEED;
+            }else if(velocity < -MAX_SPEED){
+                velocity - MAX_SPEED;
+            }
+            position += velocity;
+
+            if(position > MAX_POSITION){
+                position = MAX_POSITION;
+            }else if(position < MIN_POSITION) {
+                position = MIN_POSITION;
+            }
+
+            if(position == MIN_POSITION &&  velocity < 0){
+                velocity = 0;
+            }
+
+            terminal = position >= GOAL_POSITION && velocity >= GOAL_VELOCITY;
+            reward = (terminal) ? 100.0 : 0.0;
+            reward -= std::pow(action, 2) * 0.1;
+
+            state[0] = position;
+            state[1] = velocity;
+
+            return std::tie(state, reward, terminal, info);
+        }
+
+
+        /* Used to validate against openai GYM */
+        void override_state(double a, double b){
+            reset();
+            state[0] = a;
+            state[1] = b;
+        }
+
+
+        StateType& reset() override{
+            state[0] = rng.get<std::uniform_real_distribution<>>(-0.6, -0.4);
+            state[1] = 0;
+            terminal = false;
+            reward = 0.0;
+            info = {};
+            return state;
+        }
+
+
+
+
 
     };
 
 
-}
+} // namespace cairl::envs
 
-#endif //CLASSIC_CONTROL_MOUNTAIN_CAR_CONTINUOUS_H
+
+
+#endif //CLASSIC_CONTROL_ACROBOT_H

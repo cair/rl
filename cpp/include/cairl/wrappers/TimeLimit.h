@@ -16,7 +16,7 @@ namespace cairl::wrappers {
 
     public:
 
-        typename Environment::StepReturnType step(ActionSpace a) override{
+        typename Environment::StepReturnType step(typename Environment::ActionType a) override{
             counter++;
             if(counter > limit && last_return != nullptr){
                 return *last_return;

@@ -10,17 +10,21 @@
 int main() {
 //  auto enc = cairl::envs::flashrl::FlashEnv("https://flashrl.sysx.no/357085_heartsNoAccount.swf");
 
+
+    using cairl::spaces::Box;
     using cairl::wrappers::TimeLimit;
     using cairl::wrappers::Flatten;
     using cairl::envs::CartPoleEnv;
-    auto env =  Flatten<TimeLimit<20, CartPoleEnv>>();
+    using cairl::envs::AcrobotEnv;
+    using cairl::envs::PendulumEnv;
+    auto env =  PendulumEnv(); //Flatten<TimeLimit<20, CartPoleEnv>>();
     for(int episode = 0; episode < 10000; episode++){
         env.reset();
         int terminal, steps = 0;
-        while(!terminal){
+        while(true){
             steps++;
             const auto [s1, r, t, info] = env.step(env.action_space.sample());
-            auto obs = env.render();
+            //auto obs = env.render();
             terminal = t;
         }
     }

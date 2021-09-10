@@ -1,6 +1,6 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
-#include <carma>
+
 
 #include "cairl/envs.h"
 
@@ -30,14 +30,35 @@ py::class_<T> bind_environment(py::module& m, const char* name, std::forward_lis
 using cairl::envs::CartPoleEnv;
 using cairl::envs::flashrl::FlashEnv;
 using cairl::envs::Env;
+using cairl::envs::CartPoleEnv;
+using cairl::envs::AcrobotEnv;
+using cairl::envs::PendulumEnv;
+using cairl::envs::MountainCarContinuousEnv;
+using cairl::envs::MountainCarEnv;
+
 void init_environments(py::module& m)
 {
     auto classic_control_module = m.def_submodule("classic_control");
 
     bind_environment<CartPoleEnv>(classic_control_module, "CartPoleEnv", {})
-    .def(py::init<>())
-    .def("__override_state", &CartPoleEnv::override_state);
+            .def(py::init<>())
+            .def("__override_state", &CartPoleEnv::override_state);
 
+    bind_environment<AcrobotEnv>(classic_control_module, "AcrobotEnv", {})
+            .def(py::init<>())
+            .def("__override_state", &AcrobotEnv::override_state);
+
+    bind_environment<PendulumEnv>(classic_control_module, "PendulumEnv", {})
+            .def(py::init<>())
+            .def("__override_state", &PendulumEnv::override_state);
+
+    bind_environment<MountainCarContinuousEnv>(classic_control_module, "MountainCarContinuousEnv", {})
+            .def(py::init<>())
+            .def("__override_state", &MountainCarContinuousEnv::override_state);
+
+    bind_environment<MountainCarEnv>(classic_control_module, "MountainCarEnv", {})
+            .def(py::init<>())
+            .def("__override_state", &MountainCarEnv::override_state);
 
     auto flashrl = m.def_submodule("flashrl");
     bind_environment<FlashEnv>(flashrl, "FlashEnv", {})

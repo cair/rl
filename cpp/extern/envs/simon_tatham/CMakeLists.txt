@@ -17,6 +17,8 @@ pkg_check_modules(glib REQUIRED IMPORTED_TARGET glib-2.0)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(xpm REQUIRED IMPORTED_TARGET xpm)
 
+find_package(Boost REQUIRED COMPONENTS thread)
+
 find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -88,7 +90,7 @@ target_include_directories(simon_tatham_common
 )
 target_link_libraries(simon_tatham_common PUBLIC
         ${GTK_LIBRARIES}
-
+        Boost::thread
         PkgConfig::glib
 )
 #target_compile_definitions(simon_tatham_common PUBLIC DEBUGGING)

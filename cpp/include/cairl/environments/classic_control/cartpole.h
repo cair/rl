@@ -223,10 +223,10 @@ permalink: https://perma.cc/C9ZM-652R
 
 
 
-        StepReturnType step(Discrete as) override {
-            auto action = as.n;
+        StepReturnType step(ActionType as) override {
+            auto action = as;
 
-            if(as.contains(action)){
+            if(!action_space.contains(action)){
                 throw std::runtime_error(fmt::format("{} ({}) invalid", action, "int"));
             }
             // 0 = x

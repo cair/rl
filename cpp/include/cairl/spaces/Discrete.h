@@ -16,6 +16,7 @@ namespace cairl::spaces{
     class Discrete: public Space<int>{
 
     public:
+        using DataType = int;
         const int n;
 
         constexpr Discrete(const int n_)
@@ -30,7 +31,7 @@ namespace cairl::spaces{
         }
 
         [[nodiscard]] bool contains(const int& x) const override{
-            return x >= 0 && x < n-1;
+            return x >= 0 && x < n;
         }
 
 

@@ -5,7 +5,7 @@
 #ifndef CAIRL_SIMON_TATHAM_PUZZLE_LIGHTUP_H
 #define CAIRL_SIMON_TATHAM_PUZZLE_LIGHTUP_H
 
-
+#include <boost/thread.hpp>
 #include <string>
 #include <iostream>
 #include <random>
@@ -79,7 +79,7 @@ public:
     , symmetry(symmetry)
     , black_piece_age(black_piece_age)
     , uniform_dist(
-            647440323558759,
+            247440323558759,
             1647440323558759)
     , seed(std::to_string(uniform_dist(e1)))
     , params(default_params()){
@@ -139,12 +139,9 @@ public:
     }
 
 
-    void generate_solution_action_set(const std::string& prefix){
-        if(!std::filesystem::exists("output/" + prefix)){
-            std::filesystem::create_directory("output/" + prefix);
-        }
+    void generate_solution_action_set(){
         auto solution = get_solve_action_set();
-        auto file_name = generate_generic_file_name(prefix, true) + "_solution.txt";
+        auto file_name = generate_generic_file_name("solutions") + ".txt";
 
         /// Write to file
         std::ofstream file(file_name);
@@ -164,7 +161,7 @@ public:
         std::string arg_cpp = get_id();
 
 
-        auto screenshot_file = generate_generic_file_name(prefix, solve) + ".png";
+        auto screenshot_file = generate_generic_file_name(prefix) + ".png";
 
         bool headless = TRUE;
         int argtype = ARG_ID;
@@ -196,27 +193,34 @@ public:
         delete fe;
     }
 
-    std::string generate_generic_file_name(const std::string& prefix, bool solved){
+    std::string generate_generic_file_name(const std::string& prefix){
+        if(!std::filesystem::exists("output/solutions")){
+            std::filesystem::create_directory("output/solutions");
+        }
         return string_format(
-                "output/" + prefix + "/%s_%s_%s---%s_%s",
+                "output/" + prefix + "/%s_%sx%s_%s_%s_%s",
                 std::to_string(difficulty).c_str(),
-                std::to_string(symmetry).c_str(),
+                std::to_string(state->w).c_str(),
+                std::to_string(state->h).c_str(),
                 std::to_string(black_piece_age).c_str(),
-                get_id().c_str(),
-                (solved) ? "solved" : "unsolved"
+                std::to_string(symmetry).c_str(),
+                get_id().c_str()
+
+                //,
+                //(solved) ? "solved" : "unsolved"
         );
     }
 
     void generate_board(const std::string& prefix){
         auto board = get_board();
-        board = "%puzzles 1\n"
-                "%size " + std::to_string(params->w) + "x" + std::to_string(params->h) + "\n"
-                "%id " + get_id() + "\n" +
-                "%difficulty " + std::to_string(difficulty) + "\n" +
-                "%symmetry " + std::to_string(symmetry) + "\n" +
-                "%black_percent " + std::to_string(black_piece_age) + "\n"
+        board = "puzzles 1\n"
+                "size " + std::to_string(params->w) + "x" + std::to_string(params->h) + "\n"
+//                "%id " + get_id() + "\n" +
+//                "%difficulty " + std::to_string(difficulty) + "\n" +
+//                "%symmetry " + std::to_string(symmetry) + "\n" +
+//                "%black_percent " + std::to_string(black_piece_age) + "\n"
                 + board;
-        auto board_file_name = generate_generic_file_name(prefix, state->completed) + ".txt";
+        auto board_file_name = generate_generic_file_name(prefix) + ".txt";
 
 
 
@@ -232,7 +236,7 @@ public:
         using R = std::result_of_t<TF&&(TArgs&&...)>;
         std::packaged_task<R(TArgs...)> task(f);
         auto future = task.get_future();
-        std::thread thr(std::move(task), std::forward<TArgs>(args)...);
+        boost::thread thr(std::move(task), std::forward<TArgs>(args)...);
         if (future.wait_for(timeout) != std::future_status::timeout)
         {
             thr.join();
@@ -240,6 +244,7 @@ public:
         }
         else
         {
+            thr.interrupt();
             thr.detach(); // we leave the thread still running
             throw std::runtime_error("Timeout");
         }
@@ -249,34 +254,38 @@ public:
 
         std::mutex m;
         std::condition_variable cv;
+        std::unique_lock<std::mutex> l(m);
 
-
-        std::thread t([&cv, &fn]()
+        boost::thread t([&cv, &fn]()
         {
             fn();
-            cv.notify_one();
+            cv.notify_all();
         });
-
         t.detach();
 
+
         {
-            std::unique_lock<std::mutex> l(m);
-            if(cv.wait_for(l, std::chrono::seconds(1)) == std::cv_status::timeout)
+
+
+            if(cv.wait_for(l, std::chrono::seconds (30)) == std::cv_status::timeout){
+                t.interrupt();
+
                 throw std::runtime_error("Timeout");
+            }
+
         }
 
     }
 
-    static std::vector<std::string> generate_dataset(
-            const std::string& prefix,
+    static void generate_dataset(
             std::pair<int, int> min_max,
             const std::vector<int>& black_percentages,
             const std::vector<Difficulty>& difficulties,
             const std::vector<Symmetry>& symmetries,
             bool screenshot
     ){
-        if(!std::filesystem::exists("output/" + prefix)){
-            std::filesystem::create_directories("output/" + prefix);
+        if(!std::filesystem::exists("output/")){
+            std::filesystem::create_directories("output/");
         }
 
         if(min_max.first <= 0){
@@ -290,7 +299,7 @@ public:
 
         for(auto difficulty : difficulties){
             for(auto symmetry : symmetries){
-                #pragma omp parallel  for
+
                 for(int x = min_max.first; x < min_max.second; x++){
                     for(int y = min_max.first; y < min_max.second; y++){
                         if(x == y ||  x != y && symmetry != Symmetry::SYMMETRY_NONE){
@@ -298,33 +307,43 @@ public:
                         }
 
                     for(auto b: black_percentages){
-                        auto instance = LightUp(x, y, difficulty, static_cast<Symmetry>(symmetry), b);
 
-                        {
+                        auto fn = [&](){
+                            {
+                                auto instance = LightUp(x, y, difficulty, static_cast<Symmetry>(symmetry), b);
 
-                            std::lock_guard stahp(g_lock);
-
-
-                            std::cout << "Generating... | Size: " << x << "," << y << " | Difficulty: " << int(difficulty) << " | Symmetry: " << int(symmetry)  << std::endl;
+                                std::cout << "Generating... | Size: " << x << "," << y << " | Difficulty: " << int(difficulty) << " | Symmetry: " << int(symmetry)  << std::endl;
 
 
-                            /// Generate solution string
-                            instance.generate_solution_action_set(prefix);
+                                /// Generate solution string
+                                instance.generate_solution_action_set();
 
-                            /// Generate unsolved version
-                            if(screenshot){
-                                instance.generate_screenshot(prefix);
+                                /// Generate unsolved version
+                                if(screenshot){
+                                    instance.generate_screenshot("puzzles");
+                                }
+                                instance.generate_board("puzzles");
+
+                                instance.solve();
+
+                                /// Generate solved version
+                                if(screenshot){
+                                    instance.generate_screenshot("solutions", true);
+                                }
+                                instance.generate_board("solutions");
                             }
-                            instance.generate_board(prefix);
 
-                            instance.solve();
+                        };
 
-                            /// Generate solved version
-                            if(screenshot){
-                                instance.generate_screenshot(prefix, true);
-                            }
-                            instance.generate_board(prefix);
+                        try{
+                            threaded_timeout_task(fn); // std::chrono::seconds(10)
+                        }catch(const std::runtime_error &e){
+                            std::cout << "Timeout" << std::endl;
                         }
+
+
+
+
                     }
                     }
                 }
@@ -362,7 +381,7 @@ public:
     }
 
     ~LightUp(){
-        free_game(state);
+        //free_game(state);
     }
 };
 

@@ -16,8 +16,8 @@ namespace cairl::envs{
         class ActionSpace,
             template<class, int, int, int> class ObservationSpaceT,
             class StateScalar,
-            int StateCols,
             int StateRows,
+            int StateCols,
             int StateDims
     >
     class Env{
@@ -25,8 +25,9 @@ namespace cairl::envs{
 
         /// Box, Discrete or similar space type
         using ObservationSpaceType = StateScalar;
-        using ObservationSpace = ObservationSpaceT<StateScalar, StateCols, StateRows, StateDims>;
+        using ObservationSpace = ObservationSpaceT<StateScalar, StateRows, StateCols, StateDims>;
         using StateType = typename ObservationSpace::DataType;
+        using ActionType = typename ActionSpace::DataType;
 
         using InfoType = std::unordered_map<std::string, std::string>;
         using RewardType = double;
@@ -46,8 +47,8 @@ namespace cairl::envs{
         /// Contains return data.
         /// We use this as a member variable so that we can pass along a reference.
         InfoType info;
-        RewardType reward;
-        TerminalType terminal;
+        RewardType reward{};
+        TerminalType terminal{};
 
     public:
         StateType state;
@@ -56,7 +57,8 @@ namespace cairl::envs{
 
         constexpr Env(const ActionSpace&& action_space_, const ObservationSpace&& observation_space_)
                 : action_space(std::move(action_space_))
-                , observation_space(std::move(observation_space_)){
+                , observation_space(std::move(observation_space_))
+                {
             seed(time(NULL));
         }
 
@@ -67,7 +69,7 @@ namespace cairl::envs{
         }
 
         virtual const cv::Mat& render(const char*/*mode*/){ return dummy; }
-        virtual StepReturnType step(ActionSpace a) = 0;
+        virtual StepReturnType step(ActionType a) = 0;
         virtual StateType& reset() = 0;
 
         StateType& getState(){

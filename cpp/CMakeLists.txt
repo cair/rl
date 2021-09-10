@@ -26,9 +26,9 @@ include(cmake/AddSubdirectoryOptions.cmake)
 add_subdirectory(extern/flashrl-lightspark)
 
 CPMADDPackage(
-        NAME Armadillo
-        GIT_REPOSITORY "https://gitlab.com/conradsnicta/armadillo-code.git"
-        GIT_TAG 10.6.x
+        NAME xtensor_python
+        GIT_REPOSITORY "https://github.com/xtensor-stack/xtensor-python.git"
+        GIT_TAG 0.25.3
 )
 
 #############################################################################################
@@ -87,7 +87,6 @@ endif ()
 set(CAIRL_GYM_DEPENDENCIES
         spdlog
         effolkronium-random
-        #opencv
         python3
         sdl2-videodriver[offscreen]
         xtensor[xsimd]
@@ -102,8 +101,6 @@ set(CAIRL_GYM_LINK_TARGETS
         opencv_highgui
         Python3::NumPy
         lighspark_lib  # extern/flashrl-lightspark
-        carma
-        armadillo
         #xtensor xtensor::use_TBB
         xtensor::optimize
         xtensor::use_xsimd
@@ -137,7 +134,6 @@ find_package(pybind11 CONFIG REQUIRED)
 
 
 find_package(effolkronium_random CONFIG REQUIRED)
-find_package(Armadillo REQUIRED)
 find_package(xtensor CONFIG REQUIRED)
 
 
@@ -189,14 +185,13 @@ set(CAIRL_GYM_SOURCE_FILES
         include/cairl/utils/File.h
         include/cairl/environments/flashrl/lightspark/CaiRLEngineData.h
 
-        include/cairl/utils/arma_cv_convertions.h
 
         include/cairl/environments/flashrl/games/Multitask.h
         include/cairl/envs.h
         include/cairl/utils/VectorWrapper.h
         include/cairl/utils/xtensor_cv_convertions.h
         include/cairl/wrappers/Flatten.h
-   )
+        include/cairl/environments/classic_control/acrobot.h include/cairl/environments/classic_control/pendulum.h)
 
 
 #############################################################################################
@@ -236,10 +231,6 @@ endif()
 #############################################################################################
 #if(IS_PYBIND_BUILD)
 
-add_library(carma INTERFACE)
-target_include_directories(carma INTERFACE extern/carma/include)
-target_link_libraries(carma INTERFACE Python3::NumPy Python3::Module pybind11::pybind11)
-
 
 
 file(GLOB BIND_FILES ${PROJECT_SOURCE_DIR}/src/pybind/*.cpp)
@@ -248,7 +239,7 @@ set(ALL_BIND_FILES ${BIND_FILES_CONVERTERS} ${BIND_FILES})
 
 pybind11_add_module(gym ${ALL_BIND_FILES} ${BIND_FILES_CONVERTERS})
 message( ${PROJECT_SOURCE_DIR}/cpp/src/pybind)
-target_link_libraries(gym PUBLIC CAIRL_GYM_LIB carma)
+target_link_libraries(gym PUBLIC CAIRL_GYM_LIB)
 MESSAGE("Note: To build python bindings, run 'setup.py clean install'.")
 #endif()
 

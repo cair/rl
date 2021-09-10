@@ -1,45 +1,41 @@
 //
-// Created by per on 7/28/21.
+// Created by per on 9/10/21.
 //
 
-#ifndef CLASSIC_CONTROL_MOUNTAIN_CAR_H
-#define CLASSIC_CONTROL_MOUNTAIN_CAR_H
-
-//
-// Created by per on 7/25/21.
-//
-
-#ifndef CLASSIC_CONTROL_CARTPOLE_H
-#define CLASSIC_CONTROL_CARTPOLE_H
+#ifndef CLASSIC_CONTROL_MOUNTAINCAR_H
+#define CLASSIC_CONTROL_MOUNTAINCAR_H
+#include "cairl/defs.h"
+#include "cairl/spaces/Discrete.h"
+#include "cairl/spaces/Box.h"
 #include <cmath>
-#include <limits>
-#include "envs/Env.h"
-#include <effolkronium/random.hpp>
-#include <spaces/Discrete.h>
-#include <spdlog/spdlog.h>
-#include "rendering/renderer.h"
-
-
+#include "cairl/environments/Env.h"
+#include <xtensor/xio.hpp>
 using Random = effolkronium::random_static;
-using cairl::classic_control::renderer::Rectangle;
-using cairl::classic_control::renderer::Circle;
+using cairl::spaces::Discrete;
+using cairl::spaces::Box;
+using cairl::envs::Env;
+
+namespace cairl::envs{
 
 
-class MountainCarEnv: public Env{
-//    """
+// REFER TO https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py
+    using cairl::spaces::Space;
+
+
+
 //    Description:
-//            The agent (a car) is started at the bottom of a valley. For any given
+//    The agent (a car) is started at the bottom of a valley. For any given
 //            state the agent may choose to accelerate to the left, right or cease
 //            any acceleration.
 //    Source:
-//            The environment appeared first in Andrew Moore's PhD Thesis (1990).
+//    The environment appeared first in Andrew Moore's PhD Thesis (1990).
 //    Observation:
-//            Type: Box(2)
+//    Type: Box(2)
 //    Num    Observation               Min            Max
 //    0      Car Position              -1.2           0.6
 //    1      Car Velocity              -0.07          0.07
 //    Actions:
-//            Type: Discrete(3)
+//    Type: Discrete(3)
 //    Num    Action
 //    0      Accelerate to the Left
 //    1      Don't accelerate
@@ -47,113 +43,103 @@ class MountainCarEnv: public Env{
 //    Note: This does not affect the amount of velocity affected by the
 //    gravitational pull acting on the car.
 //    Reward:
-//            Reward of 0 is awarded if the agent reached the flag (position = 0.5)
+//    Reward of 0 is awarded if the agent reached the flag (position = 0.5)
 //    on top of the mountain.
 //    Reward of -1 is awarded if the position of the agent is less than 0.5.
 //    Starting State:
-//            The position of the car is assigned a uniform random value in
+//    The position of the car is assigned a uniform random value in
 //    [-0.6 , -0.4].
 //    The starting velocity of the car is always assigned to 0.
 //    Episode Termination:
-//            The car position is more than 0.5
+//    The car position is more than 0.5
 //    Episode length is greater than 200
-//    """
+    class MountainCarEnv: public Env<Discrete, Box, double, 2, 1, 1>
+    {
+        static constexpr double MIN_POSITION = -1.2;
+        static constexpr double MAX_POSITION = 0.6;
+        static constexpr double MAX_SPEED = 0.07;
+        static constexpr double GOAL_POSITION = 0.5;
+        static constexpr double GOAL_VELOCITY = 0.0; // todo - input argument? https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py#L57
+        static constexpr double FORCE = 0.001;
+        static constexpr double GRAVITY = 0.0025;
+
+
+    public:
+
+
+        MountainCarEnv()
+                : Env({3},{
+                {-1.2, 0.6},
+                {-0.07, 0.07},
+        })
+        {
+            reset();
+        }
+
+        const cv::Mat& render(const char* = "human"/*mode*/) override{
+            // todo - https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py#L108
+            return cv::Mat();
+        }
 
 
 
-    enum Actions{
-        ACCELERATE_LEFT,
-        DONT_ACCELERATE
-        ACCELERATE_RIGHT
-        COUNT
+        double clip(double value, double min, double max){
+            return std::max(std::min(value, max), min);
+        }
+
+        StepReturnType step(ActionType as) override {
+            auto action = as;
+
+            if(!action_space.contains(action)){
+                throw std::runtime_error(fmt::format("{} ({}) invalid", action, "int"));
+            }
+
+            auto position = state[0];
+            auto velocity = state[1];
+            velocity += (action - 1) * FORCE + std::cos(3 * position) * (-GRAVITY);
+            velocity = clip(velocity, -MAX_SPEED, MAX_SPEED);
+            position += velocity;
+            position = clip(position, MIN_POSITION, MAX_POSITION);
+            if(position == MIN_POSITION && velocity < 0){
+                velocity = 0;
+            }
+
+            terminal = position >= GOAL_POSITION && velocity >= GOAL_VELOCITY;
+            reward = (terminal) ? 0.0 : -1.0;
+
+            state[0] = position;
+            state[1] = velocity;
+
+            return std::tie(state, reward, terminal, info);
+        }
+
+
+        /* Used to validate against openai GYM */
+        void override_state(double a, double b){
+            reset();
+            state[0] = a;
+            state[1] = b;
+        }
+
+
+        StateType& reset() override{
+            state[0] = rng.get<std::uniform_real_distribution<>>(-0.6, -0.4);
+            state[1] = 0;
+            terminal = false;
+            reward = 0.0;
+            info = {};
+            return state;
+        }
+
+
+
+
+
     };
 
-    // refer to https://github.com/openai/gym/blob/master/gym/envs/classic_control/cartpole.py for comments
-    static constexpr double min_position = -1.2
-    static constexpr double max_position = 0.6;
-    static constexpr double max_speed = 0.07;
-    static constexpr double goal_position = 0.5;
-    static constexpr double goal_velocity_default = 0;
-    static constexpr double goal_velocity = goal_velocity_default;
 
-    static constexpr double force = 0.001;
-    static constexpr double gravity = 0.0025;
-
-    static constexpr std::array<double> low = {
-            min_position, -max_speed,
-    };
-    static constexpr std::array<double> high = {
-            max_position, max_speed,
-    };
-
-    /// Rendering
-    static constexpr int screen_width = 600;
-    static constexpr int screen_height = 400;
-    static constexpr double world_width = x_threshold * 2;
-    static constexpr double scale = screen_width / world_width;
-
-    static constexpr double carty = 100;
-    static constexpr double polewidth = 10.0;
-    static constexpr double polelen = scale * ( 2 * length);
-    static constexpr int cartwidth = 50;
-    static constexpr int cartheight = 30;
-
-    const cairl::spaces::Discrete action_space{Actions::COUNT};
-
-    cairl::classic_control::renderer::Renderer renderer{screen_width, screen_height};
-
-public:
-
-    MountainCarEnv(){
-        reset();
-    }
-
-    const cv::Mat& render(const char* = "human"/*mode*/){
-
-    }
-
-
-    StepReturnType step(int action){
-
-        return {
-                state,
-                reward,
-                done,
-                {}
-        };
-    }
+} // namespace cairl::envs
 
 
 
-    /* Used to validate against openai GYM */
-    void override_state(double x, double x_dot, double theta, double theta_dot){
-        reset();
-        state[0] = x;
-        state[1] = x_dot;
-        state[2] = theta;
-        state[3] = theta_dot;
-    }
-
-
-
-
-    std::array<double, 4> reset(){
-        state[0] = Random::get<std::uniform_real_distribution<>>(-0.05, 0.05);
-        state[1] = Random::get<std::uniform_real_distribution<>>(-0.05, 0.05);
-        state[2] = Random::get<std::uniform_real_distribution<>>(-0.05, 0.05);
-        state[3] = Random::get<std::uniform_real_distribution<>>(-0.05, 0.05);
-        steps_beyond_done = 0;
-        return state;
-    }
-
-
-
-
-
-};
-
-#endif //CLASSIC_CONTROL_CARTPOLE_H
-
-
-
-#endif //CLASSIC_CONTROL_MOUNTAIN_CAR_H
+#endif //CLASSIC_CONTROL_ACROBOT_H

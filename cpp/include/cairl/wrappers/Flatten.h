@@ -21,7 +21,7 @@ namespace cairl::wrappers {
 
     public:
 
-        typename Environment::StepReturnType step(ActionSpace a) override{
+        typename Environment::StepReturnType step(typename Environment::ActionType a) override{
             auto tuple =  Environment::step(a);
             flattened = xt::flatten(std::get<0>(tuple));
 
