@@ -12,6 +12,11 @@ cairl/__pycache__/__init__.cpython-38.pyc
 
 cairl/__pycache__/gym.cpython-38.pyc
 
-cairle_examples/benchmarks/other_pole.py
-/cairle_examples/benchmarks/kludder_knole.py
-/cairle_examples/benchmarks/16_8/
+cairl/examples/benchmarks/other_pole.py
+cairl/examples/benchmarks/kludder_knole.py
+cairl/examples/benchmarks/16_8/
+cairl/examples/benchmarks/logging
+cairl/examples/benchmarks/swf
+cairl/examples/benchmarks/*.pdf
+cairl/examples/benchmarks/*.png
+cairl/examples/benchmarks/*.svg

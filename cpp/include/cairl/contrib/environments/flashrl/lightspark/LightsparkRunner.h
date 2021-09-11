@@ -18,7 +18,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <GL/glew.h>
-#include <cairl/environments/flashrl/FlashEngineRunner.h>
+#include <cairl/contrib/environments/flashrl/FlashEngineRunner.h>
 #include "cairl/utils/File.h"
 #include "CaiRLEngineData.h"
 #include <thread>

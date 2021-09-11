@@ -4,7 +4,7 @@
 
 #ifndef CLASSIC_CONTROL_MULTITASK_H
 #define CLASSIC_CONTROL_MULTITASK_H
-#include "cairl/environments/flashrl/FlashEnv.h"
+#include "cairl/contrib/environments/flashrl/FlashEnv.h"
 
 namespace cairl::envs::flashrl{
 

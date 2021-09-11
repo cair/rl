@@ -35,13 +35,14 @@ namespace cairl::envs{
         using StepReturnType = std::tuple<StateType&, RewardType&, TerminalType&, InfoType&>;
 
     private:
-        cv::Mat dummy;
+
         // TODO
         /*std::array<double, 2> reward_range = {
                 std::numeric_limits<double>::min(),
                 std::numeric_limits<double>::max()
         };*/
     protected:
+        cv::Mat dummy;
         effolkronium::random_local rng{};
 
         /// Contains return data.

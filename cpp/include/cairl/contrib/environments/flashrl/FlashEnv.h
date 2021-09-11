@@ -7,7 +7,7 @@
 #include "cairl/environments/Env.h"
 #include "cairl/spaces/Box.h"
 #include "cairl/spaces/Discrete.h"
-#include "cairl/environments/flashrl/lightspark/LightsparkRunner.h"
+#include "cairl/contrib/environments/flashrl/lightspark/LightsparkRunner.h"
 
 
 using cairl::spaces::Space;

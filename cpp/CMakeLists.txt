@@ -17,19 +17,7 @@ include(cmake/pmm.cmake)
 include(cmake/CPM.cmake)
 include(cmake/AddSubdirectoryOptions.cmake)
 
-#############################################################################################
-#####
-##### Dependencies
-#####
-#############################################################################################
 
-add_subdirectory(extern/flashrl-lightspark)
-
-CPMADDPackage(
-        NAME xtensor_python
-        GIT_REPOSITORY "https://github.com/xtensor-stack/xtensor-python.git"
-        GIT_TAG 0.25.3
-)
 
 #############################################################################################
 #####
@@ -99,8 +87,7 @@ set(CAIRL_GYM_LINK_TARGETS
         effolkronium_random
         opencv_core
         opencv_highgui
-        Python3::NumPy
-        lighspark_lib  # extern/flashrl-lightspark
+        Python::NumPy
         #xtensor xtensor::use_TBB
         xtensor::optimize
         xtensor::use_xsimd
@@ -129,7 +116,7 @@ pmm(
 #find_package(sdl2-videodriver CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED )
 find_package(spdlog CONFIG REQUIRED)
-find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)
+find_package(Python COMPONENTS Interpreter NumPy REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 
 
@@ -146,7 +133,22 @@ if (OPENMP_FOUND)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+CPMAddPackage(
+        NAME xtensor_python_cair
+        GIT_REPOSITORY "https://github.com/xtensor-stack/xtensor-python.git"
+        GIT_TAG 0.25.3
+)
 
+#############################################################################################
+#####
+##### Dependencies
+#####
+#############################################################################################
+set(CAIRL_THIRD_PARTY_SOURCES "")
+set(CAIRL_THIRD_PARTY_INCLUDE_DIRS "")
+set(CAIRL_THIRD_PARTY_LINKER "")
+
+include(third_party.cmake)
 #############################################################################################
 #####
 ##### CMAKE - Source Files
@@ -176,22 +178,20 @@ set(CAIRL_GYM_SOURCE_FILES
 
         # Env
         include/cairl/environments/Env.h
-        include/cairl/environments/flashrl/FlashEnv.h
+
         include/cairl/defs.h
 
-
-        include/cairl/environments/flashrl/lightspark/LightsparkRunner.h
-        include/cairl/environments/flashrl/FlashEngineRunner.h
         include/cairl/utils/File.h
-        include/cairl/environments/flashrl/lightspark/CaiRLEngineData.h
-
-
-        include/cairl/environments/flashrl/games/Multitask.h
         include/cairl/envs.h
         include/cairl/utils/VectorWrapper.h
         include/cairl/utils/xtensor_cv_convertions.h
         include/cairl/wrappers/Flatten.h
-        include/cairl/environments/classic_control/acrobot.h include/cairl/environments/classic_control/pendulum.h)
+        include/cairl/environments/classic_control/acrobot.h
+        include/cairl/environments/classic_control/pendulum.h
+        include/cairl/contrib/environments/rts/DeepRTS.h
+        include/cairl/contrib/environments/envs.h)
+
+
 
 
 #############################################################################################
@@ -199,15 +199,17 @@ set(CAIRL_GYM_SOURCE_FILES
 ##### CMAKE - Add Library Targets
 #####
 #############################################################################################
-add_library(CAIRL_GYM_LIB ${LIBRARY_TYPE} ${CAIRL_GYM_SOURCE_FILES})
+add_library(CAIRL_GYM_LIB ${LIBRARY_TYPE} ${CAIRL_GYM_SOURCE_FILES} ${CAIRL_THIRD_PARTY_SOURCES})
 
 target_include_directories(CAIRL_GYM_LIB
         PUBLIC
         include
+        ${CAIRL_THIRD_PARTY_INCLUDE_DIRS}
         ${VCPKG_INSTALLED_DIR}/x64-linux/include
 )
 target_link_libraries(CAIRL_GYM_LIB
         PUBLIC
+        ${CAIRL_THIRD_PARTY_LINKER}
         ${CAIRL_GYM_LINK_TARGETS}
 )
 

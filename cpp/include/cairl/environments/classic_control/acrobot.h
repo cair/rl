@@ -113,7 +113,7 @@ namespace cairl::envs{
         }
 
         const cv::Mat& render(const char* = "human"/*mode*/) override{
-           return cv::Mat();
+           return dummy;
         }
 
 
@@ -199,7 +199,7 @@ namespace cairl::envs{
             if(torque_noise_max > 0){
                 torque += Random::get<double>(-torque_noise_max, torque_noise_max);
             }
-            
+
             auto ns = rk4(state, torque, 0, dt);
             state[0] = wrap(ns[0], -M_PI, M_PI);
             state[1] = wrap(ns[1], -M_PI, M_PI);

@@ -47,7 +47,7 @@ namespace cairl::envs{
 
         const cv::Mat &render(const char * = "human"/*mode*/) override {
             // todo - https://github.com/openai/gym/blob/master/gym/envs/classic_control/pendulum.py
-            return cv::Mat();
+            return dummy;
         }
 
 

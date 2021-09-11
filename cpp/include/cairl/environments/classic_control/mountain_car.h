@@ -78,12 +78,12 @@ namespace cairl::envs{
 
         const cv::Mat& render(const char* = "human"/*mode*/) override{
             // todo - https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py#L108
-            return cv::Mat();
+            return dummy;
         }
 
 
 
-        double clip(double value, double min, double max){
+        static double clip(double value, double min, double max){
             return std::max(std::min(value, max), min);
         }
 
@@ -142,4 +142,4 @@ namespace cairl::envs{
 
 
 
-#endif //CLASSIC_CONTROL_ACROBOT_H
+#endif //CLASSIC_CONTROL_MOUNTAINCAR_H
