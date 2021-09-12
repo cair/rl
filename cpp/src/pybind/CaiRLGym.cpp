@@ -7,6 +7,7 @@
 //
 
 #include <pybind11/pybind11.h>
+#include <xtensor-python/pycontainer.hpp>
 #include "converters/ndarray_converter.h"
 
 namespace py = pybind11;
@@ -34,17 +35,11 @@ void init_version(py::module& m)
     auto spaces_module = m.def_submodule("spaces"); \
     m.doc() = "CaiRL Gym";
 
-#ifndef EMBEDDED
+
 PYBIND11_MODULE(gym, m)
 {
+    xt::import_numpy();
     NDArrayConverter::init_numpy();
     BINDING_INIT
     INITS
 }
-#else
-PYBIND11_EMBEDDED_MODULE(gym, m)
-{
-    BINDING_INIT
-    INITS
-}
-#endif

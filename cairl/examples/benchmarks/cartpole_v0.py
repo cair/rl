@@ -1,4 +1,5 @@
 import os
+from experiment_impact_tracker.compute_tracker import ImpactTracker
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -7,20 +8,25 @@ import numpy as np
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
-import gym
+
 import cairl.gym
+import gym
 
 
-def cartpole_runner(env, num_trials, render):
-    start = time.time()
-    for i in range(num_trials):
-        terminal = False
-        state = env.reset()
-        while not terminal:
-            state, reward, terminal, info = env.step(env.action_space.sample())
-            if render:
-                image = env.render("rgb_array")
-    return (time.time() - start) * 1000.0
+def cartpole_runner(env, num_trials, render, experiment_name):
+    os.makedirs(f"logging/{experiment_name}", exist_ok=True)
+    with ImpactTracker(f"logging/{experiment_name}") as it:
+
+        start = time.time()
+        for i in range(num_trials):
+            terminal = False
+            state = env.reset()
+            while not terminal:
+                state, reward, terminal, info = env.step(env.action_space.sample())
+                if render:
+                    image = env.render("rgb_array")
+        it.stop()
+        return (time.time() - start) * 1000.0
 
 
 def validate_env(env_true, env_test, env_steps=60):
@@ -58,9 +64,9 @@ if __name__ == "__main__":
     ## Configuration
     ##
     """
-    runs_console = 100000
-    runs_gui = 100
-    cpp_env = cairl.gym.make("CartPole-v0")
+    runs_console = 1000000
+    runs_gui = 10000
+    cpp_env = cairl.gym.make("CartPole-v3")
     py_env = gym.make("CartPole-v0")
 
     """
@@ -83,10 +89,10 @@ if __name__ == "__main__":
     ]
 
     y = [
-        cartpole_runner(cpp_env, runs_console, False),
-        cartpole_runner(py_env, runs_console, False),
-        cartpole_runner(cpp_env, runs_gui, True),
-        cartpole_runner(py_env, runs_gui, True)
+        cartpole_runner(cpp_env, runs_console, False, "CaiRL-Console"),
+        cartpole_runner(py_env, runs_console, False, "Gym-Console"),
+        cartpole_runner(cpp_env, runs_gui, True, "CaiRL-Graphical"),
+        cartpole_runner(py_env, runs_gui, True, "Gym-Graphical")
     ]
 
     z = [
@@ -119,4 +125,3 @@ if __name__ == "__main__":
     plt.savefig("performance_cartpole_v0.png")
     plt.savefig("performance_cartpole_v0.svg")
     plt.tight_layout()
-    plt.show()

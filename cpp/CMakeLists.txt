@@ -4,7 +4,7 @@ project(classic_control)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Lock this section so that parallel CMake runs won't clash on checkout in the same directory
-file(LOCK ${CMAKE_SOURCE_DIR} DIRECTORY GUARD FILE)
+#file(LOCK ${CMAKE_SOURCE_DIR} DIRECTORY GUARD FILE)
 
 
 #############################################################################################
@@ -47,7 +47,6 @@ if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
     endif ()
 endif ()
 
-
 if (IS_PYBIND_BUILD)
     set(LIBRARY_TYPE SHARED)
 elseif (WIN32)
@@ -61,7 +60,7 @@ endif ()
 #####
 #############################################################################################
 if (WIN32)
-    set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "" FORCE)  # -static ?
+    set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "" FORCE)
     set(VCPKG_STATIC_LINKING ON)
 elseif (UNIX)
     set(VCPKG_TARGET_TRIPLET x64-linux)
@@ -77,8 +76,7 @@ set(CAIRL_GYM_DEPENDENCIES
         effolkronium-random
         python3
         sdl2-videodriver[offscreen]
-        xtensor[xsimd]
-)
+        xtensor[xsimd])
 
 
 
@@ -88,7 +86,6 @@ set(CAIRL_GYM_LINK_TARGETS
         opencv_core
         opencv_highgui
         Python::NumPy
-        #xtensor xtensor::use_TBB
         xtensor::optimize
         xtensor::use_xsimd
 )
@@ -113,17 +110,15 @@ pmm(
 ##### CMAKE - Find Packages
 #####
 #############################################################################################
-#find_package(sdl2-videodriver CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED )
 find_package(spdlog CONFIG REQUIRED)
-find_package(Python COMPONENTS Interpreter NumPy REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
+find_package(Python COMPONENTS Interpreter NumPy REQUIRED)
+
 
 
 find_package(effolkronium_random CONFIG REQUIRED)
 find_package(xtensor CONFIG REQUIRED)
-
-
 
 
 find_package(OpenMP)
@@ -133,22 +128,30 @@ if (OPENMP_FOUND)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+#############################################################################################
+#####
+##### CPM - Add Dependencies that are not in vcpkg
+#####
+#############################################################################################
+
 CPMAddPackage(
         NAME xtensor_python_cair
         GIT_REPOSITORY "https://github.com/xtensor-stack/xtensor-python.git"
         GIT_TAG 0.25.3
 )
 
+
 #############################################################################################
 #####
-##### Dependencies
-#####
+##### CMAKE - Third-party Dependencies
+##### #
 #############################################################################################
 set(CAIRL_THIRD_PARTY_SOURCES "")
 set(CAIRL_THIRD_PARTY_INCLUDE_DIRS "")
 set(CAIRL_THIRD_PARTY_LINKER "")
 
 include(third_party.cmake)
+
 #############################################################################################
 #####
 ##### CMAKE - Source Files
@@ -157,13 +160,15 @@ include(third_party.cmake)
 set(CAIRL_GYM_SOURCE_FILES
         # CartPole
         include/cairl/environments/classic_control/cartpole.h
-
-        # Mountain Car
         include/cairl/environments/classic_control/mountain_car.h
         include/cairl/environments/classic_control/mountain_car_continuous.h
 
+
         # Utils
         include/cairl/utils/Timer.h
+        include/cairl/utils/File.h
+        include/cairl/utils/VectorWrapper.h
+        include/cairl/utils/xtensor_cv_convertions.h
 
         # Spaces
         include/cairl/spaces/Space.h
@@ -181,16 +186,14 @@ set(CAIRL_GYM_SOURCE_FILES
 
         include/cairl/defs.h
 
-        include/cairl/utils/File.h
+
         include/cairl/envs.h
-        include/cairl/utils/VectorWrapper.h
-        include/cairl/utils/xtensor_cv_convertions.h
+
+
+
         include/cairl/wrappers/Flatten.h
         include/cairl/environments/classic_control/acrobot.h
-        include/cairl/environments/classic_control/pendulum.h
-        include/cairl/contrib/environments/rts/DeepRTS.h
-        include/cairl/contrib/environments/envs.h)
-
+        include/cairl/environments/classic_control/pendulum.h include/cairl/contrib/environments/flashrl/envs.h)
 
 
 
@@ -199,15 +202,23 @@ set(CAIRL_GYM_SOURCE_FILES
 ##### CMAKE - Add Library Targets
 #####
 #############################################################################################
-add_library(CAIRL_GYM_LIB ${LIBRARY_TYPE} ${CAIRL_GYM_SOURCE_FILES} ${CAIRL_THIRD_PARTY_SOURCES})
+add_library(
+        CAIRL_GYM_LIB
+        ${LIBRARY_TYPE}
+        ${CAIRL_GYM_SOURCE_FILES}
+        ${CAIRL_THIRD_PARTY_SOURCES}
+)
 
-target_include_directories(CAIRL_GYM_LIB
+target_include_directories(
+        CAIRL_GYM_LIB
         PUBLIC
         include
         ${CAIRL_THIRD_PARTY_INCLUDE_DIRS}
         ${VCPKG_INSTALLED_DIR}/x64-linux/include
 )
-target_link_libraries(CAIRL_GYM_LIB
+
+target_link_libraries(
+        CAIRL_GYM_LIB
         PUBLIC
         ${CAIRL_THIRD_PARTY_LINKER}
         ${CAIRL_GYM_LINK_TARGETS}
@@ -226,22 +237,22 @@ if (NOT IS_PYBIND_BUILD)
             CAIRL_GYM_LIB
     )
 endif()
+
 #############################################################################################
 #####
 ##### PyBind11 - Build Target
 #####
 #############################################################################################
-#if(IS_PYBIND_BUILD)
+file(GLOB BIND_FILES
+        ${PROJECT_SOURCE_DIR}/src/pybind/*.cpp
+        ${PROJECT_SOURCE_DIR}/src/pybind/converters/*.cpp
+)
 
-
-
-file(GLOB BIND_FILES ${PROJECT_SOURCE_DIR}/src/pybind/*.cpp)
-file(GLOB BIND_FILES_CONVERTERS  ${PROJECT_SOURCE_DIR}/src/pybind/converters/*.cpp)
-set(ALL_BIND_FILES ${BIND_FILES_CONVERTERS} ${BIND_FILES})
-
-pybind11_add_module(gym ${ALL_BIND_FILES} ${BIND_FILES_CONVERTERS})
-message( ${PROJECT_SOURCE_DIR}/cpp/src/pybind)
-target_link_libraries(gym PUBLIC CAIRL_GYM_LIB)
-MESSAGE("Note: To build python bindings, run 'setup.py clean install'.")
-#endif()
-
+pybind11_add_module(gym
+        ${BIND_FILES}
+)
+target_link_libraries(
+        gym
+        PUBLIC
+        CAIRL_GYM_LIB
+)

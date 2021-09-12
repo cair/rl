@@ -10,7 +10,7 @@ namespace cairl::envs::flashrl{
 
     class MultitaskEnv: public FlashEnv{
     public:
-        MultitaskEnv(): FlashEnv("https://flashrl.sysx.no/506546_MultitaskMOCHIcomplete202c.swf"){
+        MultitaskEnv(): FlashEnv("Multitask-v2", "https://flashrl.sysx.no/506546_MultitaskMOCHIcomplete202c.swf"){
 
         };
     };

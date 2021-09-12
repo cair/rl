@@ -102,12 +102,17 @@ namespace cairl::envs{
 
 
         AcrobotEnv()
-                : Env({actions_num},{
-                {-1.0, 1.0},
-                {-1.0, 1.0},
-                {-1.0, 1.0},
-                {-1.0, 1.0},
-        }), state2(state)
+            : Env(
+                "Acrobot-v3",
+                {},
+                {actions_num},
+                {
+                    {-1.0, 1.0},
+                    {-1.0, 1.0},
+                    {-1.0, 1.0},
+                    {-1.0, 1.0},
+                }
+        ), state2(state)
         {
             reset();
         }

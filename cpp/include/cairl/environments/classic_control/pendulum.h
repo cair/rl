@@ -37,11 +37,16 @@ namespace cairl::envs{
 
 
         PendulumEnv()
-                : Env({}, {
-                {-1.0,       1.0},
-                {-1.0,       1.0},
-                {-MAX_SPEED, MAX_SPEED}
-        }) {
+            : Env(
+                "Pendulum-v3",
+                {},
+                {},
+                {
+                    {-1.0,       1.0},
+                    {-1.0,       1.0},
+                    {-MAX_SPEED, MAX_SPEED}
+                }
+        ){
             reset();
         }
 

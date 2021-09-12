@@ -13,11 +13,17 @@ using cairl::spaces::Space;
 namespace cairl::spaces{
 
 
-    class Discrete: public Space<int>{
+    class Discrete: public Space<int, int>{
+
 
     public:
         using DataType = int;
         const int n;
+
+        [[nodiscard]] constexpr int initialize() const override{
+            return 0;
+        }
+
 
         constexpr Discrete(const int n_)
         : n(n_)
@@ -26,7 +32,7 @@ namespace cairl::spaces{
         operator int() const { return n; }
 
 
-        [[nodiscard]] int sample() override{
+        [[nodiscard]] int sample() const override{
             return rng::get(0, n-1);
         }
 

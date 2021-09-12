@@ -65,10 +65,15 @@ namespace cairl::envs{
 
 
         MountainCarContinuousEnv()
-                : Env({},{
-                {-1.2, 0.6},
-                {-0.07, 0.07},
-        })
+            : Env(
+                "MountainCarContinuous-v3",
+                {},
+                {},
+                {
+                    {-1.2, 0.6},
+                    {-0.07, 0.07},
+                }
+        )
         {
             reset();
         }

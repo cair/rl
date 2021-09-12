@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import pathlib
+
 import sys
 import subprocess
 
@@ -39,6 +41,8 @@ class CMakeBuild(build_ext):
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
         cmake_args = [
+            "-DPYBIND11_PYTHON_VERSION={}.{}".format(sys.version_info.major, sys.version_info.minor),
+            "-DPython_ROOT_DIR={}".format(str(pathlib.Path(sys.executable).parent.parent)),
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
             "-DPYTHON_EXECUTABLE={}".format(sys.executable),
             "-DCAIRL_GYM_VERSION_INFO={}".format(self.distribution.get_version()),
@@ -109,6 +113,7 @@ setup(
     url="https://github.com/cair/cairl",
     description="Python bindings for cairl",
     long_description="",
+    setup_requires=["pybind11", "numpy"],
     ext_modules=[CMakeExtension("cairlpp.gym")],
     extras_require={"test": "pytest"},
     # Currently, build_ext only provides an optional "highest supported C++

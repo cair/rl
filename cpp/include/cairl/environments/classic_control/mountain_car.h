@@ -68,10 +68,15 @@ namespace cairl::envs{
 
 
         MountainCarEnv()
-                : Env({3},{
-                {-1.2, 0.6},
-                {-0.07, 0.07},
-        })
+            : Env(
+                "MountainCar-v3",
+                {},
+                {3},
+                {
+                    {-1.2, 0.6},
+                    {-0.07, 0.07},
+                }
+        )
         {
             reset();
         }

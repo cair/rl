@@ -85,7 +85,7 @@ target_include_directories(simon_tatham_common
         PUBLIC
         ${puzzle_path}
         ${GTK_INCLUDE_DIRS}
-        ./
+        .
 
 )
 target_link_libraries(simon_tatham_common PUBLIC

@@ -23,13 +23,18 @@ namespace cairl::envs::flashrl{
         LightsparkRunner runner;
 
 
-        explicit FlashEnv(const std::string& url)
-        : Env({20}, {0, 255})
+        explicit FlashEnv(const std::string& name, const std::string& url)
+        : Env(
+                name,
+                {},
+                {20},
+                {0, 255}
+        )
         , runner(url, 1000)
         {}
 
         const cv::Mat& render(const char* = "human"/*mode*/) override{
-            SPDLOG_ERROR("render() function is not implemented in FlashEnv!");
+            SPDLOG_ERROR("render() function is not implemented in FlashEnv. Use step() output.");
             return dummy;
         }
 

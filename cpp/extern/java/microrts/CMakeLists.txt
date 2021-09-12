@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(cairl_microrts)
 
-include(../../../../cmake/CPM.cmake)
+include(../../../cmake/CPM.cmake)
 
 set(CMAKE_CXX_STANDARD 20)
 set(PYBIND11_CPP_STANDARD /std:c++20)
@@ -57,7 +57,7 @@ add_custom_command(
 
 add_custom_command(
         TARGET MicroRTS POST_BUILD
-        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/combine_jar.sh ${MICRORTS_LIB_DIR} ${_jarFile}
+        COMMAND bash combine_jar.sh ${MICRORTS_LIB_DIR} ${_jarFile}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MicroRTS
         )
 

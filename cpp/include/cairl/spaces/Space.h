@@ -12,7 +12,7 @@ namespace cairl::spaces {
 
 
 
-    template <typename DataType>
+    template <typename DataType, typename DataInitReturnType>
     class Space{
 
     protected:
@@ -25,7 +25,9 @@ namespace cairl::spaces {
 
         [[nodiscard]] constexpr virtual bool contains(const DataType& x) const { return false;}
 
-        constexpr virtual DataType sample()  = 0;
+        constexpr virtual DataInitReturnType initialize() const = 0;
+
+        constexpr virtual DataType sample() const  = 0;
 
         constexpr void seed(uint64_t seed_){
             //urng = Eigen::Rand::Vmt19937_64{ static_cast<uint64_t>(seed_) };

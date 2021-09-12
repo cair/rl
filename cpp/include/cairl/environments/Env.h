@@ -5,6 +5,7 @@
 #ifndef CLASSIC_CONTROL_ENV_H
 #define CLASSIC_CONTROL_ENV_H
 #include <limits>
+#include <utility>
 #include "cairl/spaces/Space.h"
 #include "cairl/defs.h"
 #include "cairl/utils/xtensor_cv_convertions.h"
@@ -55,10 +56,19 @@ namespace cairl::envs{
         StateType state;
         ActionSpace action_space;
         ObservationSpace observation_space;
+        const std::string name;
+        const std::unordered_map<std::string, std::string> config;
 
-        constexpr Env(const ActionSpace&& action_space_, const ObservationSpace&& observation_space_)
-                : action_space(std::move(action_space_))
-                , observation_space(std::move(observation_space_))
+        Env(
+                std::string name,
+                std::unordered_map<std::string, std::string> config,
+                const ActionSpace&& action_space,
+                const ObservationSpace&& observation_space)
+                : name(std::move(name))
+                , state(observation_space.initialize())
+                , config(std::move(config))
+                , action_space(std::move(action_space))
+                , observation_space(std::move(observation_space))
                 {
             seed(time(NULL));
         }
@@ -73,7 +83,7 @@ namespace cairl::envs{
         virtual StepReturnType step(ActionType a) = 0;
         virtual StateType& reset() = 0;
 
-        StateType& getState(){
+        const StateType& getState() const{
             return state;
         }
 

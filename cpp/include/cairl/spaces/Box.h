@@ -14,26 +14,38 @@
 
 namespace cairl::spaces{
 
-#define DATATYPE_MACRO \
-    typename std::conditional<Dims == 1 && Cols == 1, xt::xtensor_fixed<Scalar, xt::xshape<Rows>, xt::layout_type::row_major>,\
-    typename std::conditional<Dims == 1 && Cols >= 2, xt::xtensor_fixed<Scalar, xt::xshape<Rows, Cols>, xt::layout_type::row_major>,\
-    typename std::conditional<Dims >= 2, xt::xtensor_fixed<Scalar, xt::xshape<Rows, Cols, Dims>, xt::layout_type::row_major>, int\
-    >::type\
-    >::type\
-    >::type\
+//#define DATATYPE_MACRO \
+//    typename std::conditional<Dims == 1 && Cols == 1, xt::xtensor_fixed<Scalar, xt::xshape<Rows>, xt::layout_type::row_major>,\
+//    typename std::conditional<Dims == 1 && Cols >= 2, xt::xtensor_fixed<Scalar, xt::xshape<Rows, Cols>, xt::layout_type::row_major>,\
+//    typename std::conditional<Dims >= 2, xt::xtensor_fixed<Scalar, xt::xshape<Rows, Cols, Dims>, xt::layout_type::row_major>, int\
+//    >::type\
+//    >::type\
+//    >::type\
 
 template <typename Scalar, int Rows, int Cols, int Dims>
-class Box: public Space<DATATYPE_MACRO>{
+class Box: public Space<xt::xarray<Scalar, xt::layout_type::row_major>, typename xt::xarray<Scalar>::shape_type>{
         public:
-            using DataType = DATATYPE_MACRO;
+            using DataType = xt::xarray<Scalar, xt::layout_type::row_major>;
             using HighLowType = std::array<std::array<Scalar, 2>, Rows>;
         private:
             const double low;
             const double high;
-
-
             const std::array<int, 3> shape = {Rows, Cols, Dims};
+
+
+
         public:
+
+
+        constexpr typename xt::xarray<Scalar>::shape_type initialize() const override{
+            if constexpr(Dims == 1 && Cols == 1){
+                return {Rows};
+            }else if constexpr(Dims == 1 && Cols > 1){
+                return {Rows, Cols};
+            }else if constexpr(Dims > 1){
+                return {Rows, Cols, Dims};
+            }
+        }
 
 
             constexpr Box(
@@ -55,7 +67,7 @@ class Box: public Space<DATATYPE_MACRO>{
                 // : high_low((empty(dataType)) ? *{} : *dataType.begin())
             }
 
-            constexpr DataType sample() override {
+            constexpr DataType sample() const override {
                 // https://github.com/openai/gym/blob/31be35ecd460f670f0c4b653a14c9996b7facc6c/gym/spaces/box.py#L83
                 if constexpr(Dims == 1){
                     return DataType({Rows, Cols});

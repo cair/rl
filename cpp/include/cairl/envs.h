@@ -15,4 +15,6 @@
 /// Include all contrib environments.
 #include "cairl/contrib/environments/envs.h"
 
+#include "cairl/contrib/environments/flashrl/envs.h"
+
 #endif //CLASSIC_CONTROL_ENVS_H

@@ -54,11 +54,11 @@ public:
     , url(url_){
 
         /// Download SWF if missing!
-        SPDLOG_INFO("Downloading file....");
+        SPDLOG_DEBUG("Downloading file....");
         downloadPath = std::filesystem::current_path() / "swf";
         std::filesystem::create_directory(downloadPath);
         filePath = FileUtil::download(url, downloadPath);
-        SPDLOG_INFO("Downloading file.... COMPLETE");
+        SPDLOG_DEBUG("Downloading file.... COMPLETE");
 
         /// Get game metadata
         gameName = FileUtil::get_filename(filePath);
