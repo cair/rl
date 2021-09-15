@@ -49,15 +49,15 @@ TODO
 
 # Environments
 The following environments are included as of this commit:
-1. Deep Maze (Python)
-2. Deep RTS (C++)
-3. Deep Warehouse (Python)
-4. Deep Line Wars 1 (Python)
-5. Deep Line Wars 2 (C++)
-6. Flash RL (C++)
-7. Hex AI (C/C++)
-8. X1337 Space Shooter (C++)
-9. Classic Control (C++)
+1. Deep Maze (Python) (Done)
+2. Deep RTS (C++) (Done)
+3. Deep Warehouse (Python) (Done)
+4. Deep Line Wars 1 (Python) (Done)
+5. Deep Line Wars 2 (C++) (TODO, GUI needs rewrite)
+6. Flash RL (C++) (Done)
+7. Hex AI (C/C++) (Done)
+8. X1337 Space Shooter (C++) (Done Partially)
+9. Classic Control (C++) (Done)
 
 Note that not all environments are implemented in full CaiRL Gym style, but this is eventually the goal, including adding new games/problems/environments in the future!
 
