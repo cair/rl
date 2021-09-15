@@ -43,7 +43,7 @@ permalink: https://perma.cc/C9ZM-652R
     using cairl::spaces::Space;
 
 
-    class CartPoleEnv: public Env<Discrete, Box, double, 4, 1, 1>
+    class CartPoleEnv: public Env<Discrete, Box>
     {
         //    Description:
         //        A pole is attached by an un-actuated joint to a cart, which moves along
@@ -189,12 +189,8 @@ permalink: https://perma.cc/C9ZM-652R
         : Env(
                 "CartPole-v3",
                 {},
-                {2},{
-                {-4.8, 4.8},
-                {std::numeric_limits<double>::min(), std::numeric_limits<double>::max()},
-                {-0.418, 0.418},
-                {std::numeric_limits<double>::min(), std::numeric_limits<double>::max()}
-        })
+                {2},{{4, 1, 1}}
+        )
         {
             reset();
         }

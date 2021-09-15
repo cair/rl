@@ -15,7 +15,7 @@ using cairl::spaces::Space;
 
 namespace cairl::envs::flashrl{
 
-    class FlashEnv: public Env<Discrete, Box, uint8_t , 80, 80, 3>{
+    class FlashEnv: public Env<Discrete, Box>{
     cv::Mat dummy;
     StateType state;
     public:
@@ -28,7 +28,7 @@ namespace cairl::envs::flashrl{
                 name,
                 {},
                 {20},
-                {0, 255}
+                {{80, 80, 3}}
         )
         , runner(url, 1000)
         {}

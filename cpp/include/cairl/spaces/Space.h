@@ -9,29 +9,28 @@
 
 namespace cairl::spaces {
 
-
-
-
-    template <typename DataType, typename DataInitReturnType>
+    template <class DataTypeT, typename DataInitReturnTypeT>
     class Space{
 
-    protected:
-        using rng = effolkronium::random_static;
-
-
     public:
-        constexpr Space()
-        {}
+        using DataType =  DataTypeT;
+        using DataInitReturnType = DataInitReturnTypeT;
+
+
+
+        effolkronium::random_local rng;
+
+        constexpr Space() = default;
 
         [[nodiscard]] constexpr virtual bool contains(const DataType& x) const { return false;}
 
-        constexpr virtual DataInitReturnType initialize() const = 0;
+        virtual DataInitReturnType initialize() const = 0;
 
-        constexpr virtual DataType sample() const  = 0;
+        virtual DataType sample()  = 0;
 
         constexpr void seed(uint64_t seed_){
-            //urng = Eigen::Rand::Vmt19937_64{ static_cast<uint64_t>(seed_) };
-            rng::seed(seed_);
+
+            rng.seed(seed_);
         }
 
     };

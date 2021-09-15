@@ -13,35 +13,20 @@ using cairl::spaces::Space;
 
 namespace cairl::envs{
 
-    template <
-        class ActionSpace,
-            template<class, int, int, int> class ObservationSpaceT,
-            class StateScalar,
-            int StateRows,
-            int StateCols,
-            int StateDims
-    >
+    template <class ActionSpaceT, class ObservationSpaceT>
     class Env{
     public:
 
         /// Box, Discrete or similar space type
-        using ObservationSpaceType = StateScalar;
-        using ObservationSpace = ObservationSpaceT<StateScalar, StateRows, StateCols, StateDims>;
+        using ObservationSpace = ObservationSpaceT;
         using StateType = typename ObservationSpace::DataType;
-        using ActionType = typename ActionSpace::DataType;
+        using ActionType = typename ActionSpaceT::DataType;
 
         using InfoType = std::unordered_map<std::string, std::string>;
         using RewardType = double;
         using TerminalType = bool;
         using StepReturnType = std::tuple<StateType&, RewardType&, TerminalType&, InfoType&>;
 
-    private:
-
-        // TODO
-        /*std::array<double, 2> reward_range = {
-                std::numeric_limits<double>::min(),
-                std::numeric_limits<double>::max()
-        };*/
     protected:
         cv::Mat dummy;
         effolkronium::random_local rng{};
@@ -54,7 +39,7 @@ namespace cairl::envs{
 
     public:
         StateType state;
-        ActionSpace action_space;
+        ActionSpaceT action_space;
         ObservationSpace observation_space;
         const std::string name;
         const std::unordered_map<std::string, std::string> config;
@@ -62,7 +47,7 @@ namespace cairl::envs{
         Env(
                 std::string name,
                 std::unordered_map<std::string, std::string> config,
-                const ActionSpace&& action_space,
+                const ActionSpaceT&& action_space,
                 const ObservationSpace&& observation_space)
                 : name(std::move(name))
                 , state(observation_space.initialize())

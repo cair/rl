@@ -22,7 +22,7 @@ namespace cairl::envs{
     using cairl::spaces::Space;
 
 
-    class PendulumEnv: public Env<Box<double, 1, 1, 1>, Box, double, 3, 1, 1> {
+    class PendulumEnv: public Env<Box, Box> {
 
         static constexpr double MAX_SPEED = 8.0;
         static constexpr double MAX_TORQUE = 2.0;
@@ -40,12 +40,8 @@ namespace cairl::envs{
             : Env(
                 "Pendulum-v3",
                 {},
-                {},
-                {
-                    {-1.0,       1.0},
-                    {-1.0,       1.0},
-                    {-MAX_SPEED, MAX_SPEED}
-                }
+                {{1, 1, 1}},
+                {{3, 1, 1}}
         ){
             reset();
         }

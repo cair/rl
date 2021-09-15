@@ -18,7 +18,7 @@ using DeepRTS::Constants::ACTION_MAX;
 namespace cairl::contrib::DeepRTS{
 
     template <class DeepRTSCollectionType>
-    class DeepRTSCollection: public Env<Discrete, Box, uint8_t , 80, 80, 3>{
+    class DeepRTSCollection: public Env<Discrete, Box>{
         cv::Mat dummy;
         StateType state;
 
@@ -28,7 +28,7 @@ namespace cairl::contrib::DeepRTS{
         DeepRTSCollectionType game;
 
         explicit DeepRTSCollection(const std::string& envName, const std::unordered_map<std::string, std::string>& config = {})
-                : Env(envName, config, {ACTION_MAX}, {0, 255})
+                : Env(envName, config, {ACTION_MAX}, {{80, 80, 3}})
                 , game()
         {
             game.setMaxFPS(0);

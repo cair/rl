@@ -5,9 +5,8 @@
 #ifndef CLASSIC_CONTROL_DISCRETE_H
 #define CLASSIC_CONTROL_DISCRETE_H
 #include <any>
-#include <effolkronium/random.hpp>
 #include <cairl/spaces/Space.h>
-using Random = effolkronium::random_static;
+
 using cairl::spaces::Space;
 
 namespace cairl::spaces{
@@ -17,7 +16,6 @@ namespace cairl::spaces{
 
 
     public:
-        using DataType = int;
         const int n;
 
         [[nodiscard]] constexpr int initialize() const override{
@@ -29,11 +27,11 @@ namespace cairl::spaces{
         : n(n_)
         {}
 
-        operator int() const { return n; }
+        operator DataType () const { return n; }
 
 
-        [[nodiscard]] int sample() const override{
-            return rng::get(0, n-1);
+        [[nodiscard]] DataType sample() override{
+            return rng.get<int>(0, n-1);
         }
 
         [[nodiscard]] bool contains(const int& x) const override{

@@ -12,8 +12,6 @@ namespace py = pybind11;
 
 template <class T>
 py::class_<T> bind_environment(py::module& m, const char* name, std::forward_list<T> args...){
-    using VType = typename T::StateType;
-    using VDType = typename T::ObservationSpaceType;
 
     return py::class_<T>(m, name)
     .def_readonly("action_space", &T::action_space)

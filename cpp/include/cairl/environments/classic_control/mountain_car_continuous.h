@@ -47,7 +47,7 @@ namespace cairl::envs{
 //    Episode Termination:
 //    The car position is more than 0.45
 //    Episode length is greater than 200
-    class MountainCarContinuousEnv: public Env<Box<double, 1, 1, 1>, Box, double, 2, 1, 1>
+    class MountainCarContinuousEnv: public Env<Box, Box>
     {
 
         static constexpr double MIN_ACTION = -1.0;
@@ -68,11 +68,8 @@ namespace cairl::envs{
             : Env(
                 "MountainCarContinuous-v3",
                 {},
-                {},
-                {
-                    {-1.2, 0.6},
-                    {-0.07, 0.07},
-                }
+                {{ 1, 1, 1}},
+                {{2, 1, 1}}
         )
         {
             reset();

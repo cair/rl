@@ -4,7 +4,8 @@ project(classic_control)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Lock this section so that parallel CMake runs won't clash on checkout in the same directory
-#file(LOCK ${CMAKE_SOURCE_DIR} DIRECTORY GUARD FILE)
+file(LOCK ${CMAKE_CURRENT_SOURCE_DIR}/cairl.lock DIRECTORY GUARD FILE)
+
 
 
 #############################################################################################
@@ -75,8 +76,9 @@ set(CAIRL_GYM_DEPENDENCIES
         spdlog
         effolkronium-random
         python3
-        sdl2-videodriver[offscreen]
-        xtensor[xsimd])
+        xtensor
+        sdl2
+)
 
 
 
@@ -87,7 +89,9 @@ set(CAIRL_GYM_LINK_TARGETS
         opencv_highgui
         Python::NumPy
         xtensor::optimize
-        xtensor::use_xsimd
+        xtensor
+        SDL2::SDL2
+
 )
 
 
@@ -99,10 +103,7 @@ pmm(
         REVISION master
         REQUIRES ${CAIRL_GYM_DEPENDENCIES}
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        PORTS ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-ports/sdl2-videodriver
 )
-
-
 
 
 #############################################################################################
@@ -114,6 +115,7 @@ find_package(OpenCV CONFIG REQUIRED )
 find_package(spdlog CONFIG REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Python COMPONENTS Interpreter NumPy REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
 
 
 
@@ -133,24 +135,14 @@ endif()
 ##### CPM - Add Dependencies that are not in vcpkg
 #####
 #############################################################################################
+if (NOT TARGET xtensor-python)
+    CPMAddPackage(
+            NAME xtensor-python
+            GIT_REPOSITORY "https://github.com/xtensor-stack/xtensor-python.git"
+            GIT_TAG 0.25.3
+    )
+endif()
 
-CPMAddPackage(
-        NAME xtensor_python_cair
-        GIT_REPOSITORY "https://github.com/xtensor-stack/xtensor-python.git"
-        GIT_TAG 0.25.3
-)
-
-
-#############################################################################################
-#####
-##### CMAKE - Third-party Dependencies
-##### #
-#############################################################################################
-set(CAIRL_THIRD_PARTY_SOURCES "")
-set(CAIRL_THIRD_PARTY_INCLUDE_DIRS "")
-set(CAIRL_THIRD_PARTY_LINKER "")
-
-include(third_party.cmake)
 
 #############################################################################################
 #####
@@ -183,17 +175,28 @@ set(CAIRL_GYM_SOURCE_FILES
 
         # Env
         include/cairl/environments/Env.h
-
         include/cairl/defs.h
-
-
         include/cairl/envs.h
-
-
-
         include/cairl/wrappers/Flatten.h
         include/cairl/environments/classic_control/acrobot.h
-        include/cairl/environments/classic_control/pendulum.h include/cairl/contrib/environments/flashrl/envs.h)
+        include/cairl/environments/classic_control/pendulum.h
+        include/cairl/contrib/environments/flashrl/envs.h
+        )
+
+
+
+
+#############################################################################################
+#####
+##### CMAKE - Third-party Dependencies
+##### #
+#############################################################################################
+set(CAIRL_THIRD_PARTY_SOURCES "")
+set(CAIRL_THIRD_PARTY_INCLUDE_DIRS "")
+set(CAIRL_THIRD_PARTY_LINKER "")
+
+include(third_party.cmake)
+
 
 
 
@@ -220,8 +223,10 @@ target_include_directories(
 target_link_libraries(
         CAIRL_GYM_LIB
         PUBLIC
-        ${CAIRL_THIRD_PARTY_LINKER}
         ${CAIRL_GYM_LINK_TARGETS}
+        ${CAIRL_THIRD_PARTY_LINKER}
+
+
 )
 
 #############################################################################################

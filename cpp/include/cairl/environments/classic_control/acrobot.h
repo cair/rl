@@ -59,7 +59,7 @@ namespace cairl::envs{
 //                the system dynamics and is more realistic, but also considerably harder
 //        than the original version which employs Euler integration,
 //                see the AcrobotLegacy class.
-    class AcrobotEnv: public Env<Discrete, Box, double, 6, 1, 1>
+    class AcrobotEnv: public Env<Discrete, Box>
     {
 
         static constexpr double LINK_LENGTH_1 = 1.0;  // # [m]
@@ -106,12 +106,7 @@ namespace cairl::envs{
                 "Acrobot-v3",
                 {},
                 {actions_num},
-                {
-                    {-1.0, 1.0},
-                    {-1.0, 1.0},
-                    {-1.0, 1.0},
-                    {-1.0, 1.0},
-                }
+                {{6, 1, 1}}
         ), state2(state)
         {
             reset();

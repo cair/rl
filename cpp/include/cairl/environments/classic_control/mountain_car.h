@@ -53,7 +53,7 @@ namespace cairl::envs{
 //    Episode Termination:
 //    The car position is more than 0.5
 //    Episode length is greater than 200
-    class MountainCarEnv: public Env<Discrete, Box, double, 2, 1, 1>
+    class MountainCarEnv: public Env<Discrete, Box>
     {
         static constexpr double MIN_POSITION = -1.2;
         static constexpr double MAX_POSITION = 0.6;
@@ -72,10 +72,7 @@ namespace cairl::envs{
                 "MountainCar-v3",
                 {},
                 {3},
-                {
-                    {-1.2, 0.6},
-                    {-0.07, 0.07},
-                }
+                {{2, 1, 1}}
         )
         {
             reset();

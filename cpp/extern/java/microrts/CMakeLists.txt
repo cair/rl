@@ -15,6 +15,9 @@ include(UseJava)
 
 set(CAIRL_JAVA_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR})
 
+
+
+
 CPMAddPackage(
         NAME microrts
         GITHUB_REPOSITORY santiontanon/microrts
@@ -57,17 +60,24 @@ add_custom_command(
 
 add_custom_command(
         TARGET MicroRTS POST_BUILD
-        COMMAND bash combine_jar.sh ${MICRORTS_LIB_DIR} ${_jarFile}
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/combine_jar.sh ${MICRORTS_LIB_DIR} ${_jarFile}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MicroRTS
         )
 
 # | xargs -n 1 jar xvf
 
+#TODO Own library
+set(JNIWRAPPER_SOURCES
+        jniwrapper/include/jniwrapper/Java.h
 
-add_library(cairl_microrts_lib STATIC /dev/null)
+)
+
+
+add_library(cairl_microrts_lib STATIC /dev/null ${JNIWRAPPER_SOURCES})
 target_include_directories(
         cairl_microrts_lib PUBLIC
         include
+        jniwrapper/include  # TODO own library
         ${JAVA_INCLUDE_PATH}
         ${JAVA_INCLUDE_PATH2}
         ${JAVA_AWT_INCLUDE_PATH}
